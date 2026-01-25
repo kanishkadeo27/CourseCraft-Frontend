@@ -1,13 +1,34 @@
 import { useState } from "react";
 
 const ContactUs = () => {
-  // TEMP logged-in user (later from AuthContext)
+  /**
+   * TEMP DATA
+   * -----------------------------------
+   * AFTER BACKEND:
+   * - REMOVE hardcoded values
+   * - GET name & email from AuthContext
+   *   example:
+   *   const { user } = useAuth();
+   *   setForm({
+   *     name: user.name,
+   *     email: user.email,
+   *     message: ""
+   *   })
+   */
   const [form, setForm] = useState({
     name: "Kanishka Deo",
     email: "kanishka@example.com",
     message: "",
   });
 
+  /**
+   * FORM SUBMIT
+   * -----------------------------------
+   * AFTER BACKEND:
+   * - Replace console.log with API call (axios/fetch)
+   * - POST /api/contact
+   * - Show success / error toast
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -16,77 +37,81 @@ const ContactUs = () => {
       return;
     }
 
-    // TODO: replace with API call
+    // TEMP: frontend only
     console.log("Contact form submitted:", form);
 
-    setForm({ ...form, message: "" });
+    // Clear message after submit
+    setForm((prev) => ({ ...prev, message: "" }));
   };
 
   return (
-    <section className="text-gray-600 body-font">
-      <div className="container px-5 py-24 mx-auto flex flex-wrap items-center">
+    <section className="min-h-[80vh] flex flex-col items-center justify-start pt-16 px-4">
 
-        <h1 className="text-3xl font-medium text-gray-900 mb-6 w-full text-center">
-          Contact Us
-        </h1>
+      {/* PAGE TITLE */}
+      <h1 className="text-3xl font-normal text-gray-900 mb-10">
+        Contact Us
+      </h1>
 
-        <div className="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col mx-auto">
-          <form onSubmit={handleSubmit}>
+      {/* FORM CARD */}
+      <div
+        className="w-full max-w-lg rounded-xl p-8"
+        style={{ backgroundColor: "#f5f6f8" }}
+      >
+        <form onSubmit={handleSubmit}>
 
-            {/* Name */}
-            <div className="relative mb-4">
-              <label className="leading-7 text-sm text-gray-600">
-                Name
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                disabled
-                className="w-full bg-white rounded border border-gray-300 py-2 px-3 text-gray-700"
-              />
-            </div>
+          {/* NAME */}
+          <div className="mb-6">
+            <label className="block text-sm text-gray-700 mb-2">
+              Name
+            </label>
+            <input
+              type="text"
+              value={form.name}
+              disabled
+              className="w-full bg-white rounded py-3 px-4 text-gray-700 focus:outline-none shadow-sm"
+            />
+          </div>
 
-            {/* Email */}
-            <div className="relative mb-4">
-              <label className="leading-7 text-sm text-gray-600">
-                Email
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                disabled
-                className="w-full bg-white rounded border border-gray-300 py-2 px-3 text-gray-700"
-              />
-            </div>
+          {/* EMAIL */}
+          <div className="mb-6">
+            <label className="block text-sm text-gray-700 mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              disabled
+              className="w-full bg-white rounded py-3 px-4 text-gray-700 focus:outline-none shadow-sm"
+            />
+          </div>
 
-            {/* Message */}
-            <div className="relative mb-6">
-              <label className="leading-7 text-sm text-gray-600">
-                Message
-              </label>
-              <textarea
-                className="w-full bg-white rounded border border-gray-300 py-2 px-3 text-gray-700 h-32 resize-none"
-                placeholder="Enter your message here"
-                value={form.message}
-                onChange={(e) =>
-                  setForm({ ...form, message: e.target.value })
-                }
-                required
-              />
-            </div>
+          {/* MESSAGE */}
+          <div className="mb-10">
+            <label className="block text-sm text-gray-700 mb-2">
+              Message
+            </label>
+            <textarea
+              placeholder="Enter your message here"
+              value={form.message}
+              onChange={(e) =>
+                setForm({ ...form, message: e.target.value })
+              }
+              className="w-full bg-white rounded py-3 px-4 text-gray-700 h-32 resize-none focus:outline-none shadow-sm"
+              required
+            />
+          </div>
 
-            {/* Submit */}
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                className="bg-indigo-500 text-white px-8 py-2 rounded-full hover:bg-indigo-600"
-              >
-                Submit
-              </button>
-            </div>
+          {/* SUBMIT BUTTON */}
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="bg-indigo-500 text-white px-10 py-3 rounded-full text-lg hover:bg-indigo-600 transition"
+            >
+              Submit
+            </button>
+          </div>
 
-          </form>
-        </div>
+        </form>
       </div>
     </section>
   );
