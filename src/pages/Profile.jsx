@@ -1,13 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const Profile = () => {
-  // TEMP user data (later from AuthContext / API)
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState({
-    id: 2,
-    email: "kanishka@example.com",
-    name: "Kanishka Deo",
+    id: "",
+    email: "",
+    name: "",
     password: "",
   });
+  const [loading, setLoading] = useState(true);
+
+  // Load user data from AuthContext
+  useEffect(() => {
+    if (authUser) {
+      setUser({
+        id: authUser.id || "",
+        email: authUser.email || "",
+        name: authUser.name || "",
+        password: "",
+      });
+    }
+    setLoading(false);
+  }, [authUser]);
+
+  if (loading) {
+    return (
+      <section className="container mx-auto pt-24 px-6">
+        <div className="text-center">Loading profile...</div>
+      </section>
+    );
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();

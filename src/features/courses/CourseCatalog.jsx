@@ -1,4 +1,5 @@
 import CourseCard from "../../components/course/CourseCard.jsx";
+import { useAuth } from "../../context/AuthContext";
 
 const dummyCourses = [
   {
@@ -15,7 +16,7 @@ const dummyCourses = [
 ];
 
 const CourseCatalog = () => {
-  const user = null; // later from AuthContext
+  const { user } = useAuth();
 
   return (
     <section className="banner courses archive section">

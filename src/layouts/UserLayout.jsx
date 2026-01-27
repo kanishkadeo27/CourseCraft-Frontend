@@ -1,21 +1,17 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../components/common/Navbar";
+import UserNavbar from "../components/common/UserNavbar";
 import Footer from "../components/common/Footer";
 
-const PublicLayout = () => {
+const UserLayout = () => {
   return (
     <>
-      <Navbar />
-
+      <UserNavbar />
       <main className="pt-20">
-  <Outlet />
-</main>
-
-
+        <Outlet />
+      </main>
       <Footer />
-
     </>
   );
 };
 
-export default PublicLayout;
+export default UserLayout;

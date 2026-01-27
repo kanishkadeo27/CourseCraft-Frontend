@@ -1,46 +1,50 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Register = () => {
-  /**
-   * AFTER BACKEND INTEGRATION:
-   * --------------------------------
-   * ❌ Remove individual useState fields
-   * ✅ Use AuthContext OR react-hook-form
-   * ✅ Call POST /auth/register API
-   * ✅ On success → navigate("/login") OR auto-login
-   */
-
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  // Error from validation / backend response
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ---------- FRONTEND VALIDATION ----------
+    // Frontend validation
     if (!name || !email || !password) {
       setError("All fields are required");
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     setError("");
+    setSuccess("");
+    setLoading(true);
 
-    /**
-     * AFTER BACKEND:
-     * --------------------------------
-     * axios.post("/auth/register", { name, email, password })
-     *   .then(() => navigate("/login"))
-     *   .catch(err => setError(err.response.data.message))
-     */
-
-    console.log("Register data:", { name, email, password });
+    try {
+      await register(name, email, password);
+      setSuccess("Registration successful! Please login.");
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,6 +87,13 @@ const Register = () => {
                 {error && (
                   <p className="text-red-500 text-sm text-center mb-4">
                     {error}
+                  </p>
+                )}
+
+                {/* SUCCESS MESSAGE */}
+                {success && (
+                  <p className="text-green-500 text-sm text-center mb-4">
+                    {success}
                   </p>
                 )}
 
@@ -144,9 +155,10 @@ const Register = () => {
                 {/* SUBMIT */}
                 <button
                   type="submit"
-                  className="w-full bg-indigo-500 text-white py-3 rounded font-semibold hover:bg-indigo-600 transition"
+                  disabled={loading}
+                  className="w-full bg-indigo-500 text-white py-3 rounded font-semibold hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign Up
+                  {loading ? "Creating Account..." : "Sign Up"}
                 </button>
 
                 {/* LOGIN LINK */}

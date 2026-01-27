@@ -1,14 +1,21 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   // 🔹 FORM STATE
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Get redirect path from location state
+  const from = location.state?.from?.pathname || "/";
 
   /**
    * HANDLE LOGIN SUBMIT
@@ -16,41 +23,25 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Frontend validation (keep this even after backend)
+    // ✅ Frontend validation
     if (!email || !password) {
       setError("Email and password are required");
       return;
     }
 
     setError("");
+    setLoading(true);
 
-    /**
-     * 🚀 AFTER BACKEND INTEGRATION:
-     * --------------------------------
-     * 1️⃣ Call backend login API (axios/fetch)
-     *    POST /auth/login
-     *    body: { email, password }
-     *
-     * 2️⃣ On success:
-     *    - Save JWT token (localStorage / cookies)
-     *    - Save user object (id, name, role)
-     *    - Update AuthContext (setUser)
-     *
-     * 3️⃣ Redirect user based on role:
-     *    - user  → /courses or /search
-     *    - admin → /admin/dashboard
-     *
-     * 4️⃣ On failure:
-     *    - Show backend error message
-     */
-
-    console.log({ email, password }); // TEMP (remove after backend)
-
-    // Example (after backend):
-    // const res = await axios.post("/api/auth/login", { email, password });
-    // localStorage.setItem("token", res.data.token);
-    // setUser(res.data.user);
-    // navigate("/");
+    try {
+      await login(email, password);
+      
+      // Redirect to intended page or home
+      navigate(from, { replace: true });
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,9 +132,10 @@ const Login = () => {
                 {/* LOGIN BUTTON */}
                 <button
                   type="submit"
-                  className="w-full bg-indigo-500 text-white py-3 rounded-md font-medium hover:bg-indigo-600 transition"
+                  disabled={loading}
+                  className="w-full bg-indigo-500 text-white py-3 rounded-md font-medium hover:bg-indigo-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  LOGIN
+                  {loading ? "Logging in..." : "LOGIN"}
                 </button>
 
                 {/* SIGNUP LINK */}

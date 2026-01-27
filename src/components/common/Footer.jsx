@@ -1,16 +1,8 @@
 import { Link } from "react-router-dom";
-
-/**
- * TEMP user
- * ❗ AFTER BACKEND:
- * const { user } = useAuth();
- */
-const user = null;
-// const user = { role: "user" };
-// const user = { role: "admin" };
-
+import { useAuth } from "../../context/AuthContext";
 
 const Footer = () => {
+  const { user } = useAuth();
    return (
     <footer className="ftr-footer">
   <div className="ftr-container">
@@ -65,7 +57,7 @@ const Footer = () => {
   )}
 
   {/* ================= USER MENU ================= */}
-  {user?.role === "user" && (
+  {user?.role?.toLowerCase() === "user" && (
     <div className="menu-grid">
       <ul>
         <li><Link to="/">Home</Link></li>
@@ -73,24 +65,27 @@ const Footer = () => {
         <li><Link to="/courses">Courses</Link></li>
       </ul>
       <ul>
-        <li><Link to="/my-courses">My Courses</Link></li>
-        <li><Link to="/profile">Profile</Link></li>
+        <li><Link to="/user/my-courses">My Courses</Link></li>
+        <li><Link to="/user/profile">Profile</Link></li>
         <li><Link to="/contact-us">Contact Us</Link></li>
       </ul>
     </div>
   )}
 
   {/* ================= ADMIN MENU ================= */}
-  {user?.role === "admin" && (
+  {user?.role?.toLowerCase() === "admin" && (
     <div className="menu-grid">
       <ul>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/search">Search</Link></li>
+        <li><Link to="/admin/dashboard">Dashboard</Link></li>
         <li><Link to="/admin/courses/create">Add Course</Link></li>
       </ul>
       <ul>
-        <li><Link to="/courses">Manage Courses</Link></li>
-        <li><Link to="/profile">Profile</Link></li>
+        <li><Link to="/admin/manage-courses">Manage Courses</Link></li>
+        <li><Link to="/admin/users">Manage Users</Link></li>
+        <li><Link to="/admin/analytics">Analytics</Link></li>
+        <li><Link to="/user/profile">Profile</Link></li>
       </ul>
     </div>
   )}

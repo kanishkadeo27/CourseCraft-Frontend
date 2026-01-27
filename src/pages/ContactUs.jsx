@@ -1,34 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const ContactUs = () => {
-  /**
-   * TEMP DATA
-   * -----------------------------------
-   * AFTER BACKEND:
-   * - REMOVE hardcoded values
-   * - GET name & email from AuthContext
-   *   example:
-   *   const { user } = useAuth();
-   *   setForm({
-   *     name: user.name,
-   *     email: user.email,
-   *     message: ""
-   *   })
-   */
+  const { user } = useAuth();
   const [form, setForm] = useState({
-    name: "Kanishka Deo",
-    email: "kanishka@example.com",
+    name: "",
+    email: "",
     message: "",
   });
 
-  /**
-   * FORM SUBMIT
-   * -----------------------------------
-   * AFTER BACKEND:
-   * - Replace console.log with API call (axios/fetch)
-   * - POST /api/contact
-   * - Show success / error toast
-   */
+  // Load user data from AuthContext
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        name: user.name || "",
+        email: user.email || "",
+      }));
+    }
+  }, [user]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -37,8 +28,9 @@ const ContactUs = () => {
       return;
     }
 
-    // TEMP: frontend only
+    // TODO: Replace with actual API call
     console.log("Contact form submitted:", form);
+    alert("Thank you for your message! We'll get back to you soon.");
 
     // Clear message after submit
     setForm((prev) => ({ ...prev, message: "" }));
@@ -66,9 +58,11 @@ const ContactUs = () => {
             </label>
             <input
               type="text"
+              placeholder="Enter your name"
               value={form.name}
-              disabled
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full bg-white rounded py-3 px-4 text-gray-700 focus:outline-none shadow-sm"
+              required
             />
           </div>
 
@@ -79,9 +73,11 @@ const ContactUs = () => {
             </label>
             <input
               type="email"
+              placeholder="Enter your email"
               value={form.email}
-              disabled
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="w-full bg-white rounded py-3 px-4 text-gray-700 focus:outline-none shadow-sm"
+              required
             />
           </div>
 

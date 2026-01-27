@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
-  // TEMP user (later from AuthContext)
-  const user = null;
-  // const user = { name: "Kanishka" };
+  // Get user from AuthContext
+  const { user } = useAuth();
 
-  const [typedText, setTypedText] = useState("");
-  const [typedGuest, setTypedGuest] = useState("");
+  const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
-    const text = user?.name ? `${user.name}!` : "guest!";
+    // Reset display text when user changes
+    setDisplayText("");
+    
+    const targetText = user?.name ? `${user.name}!` : "guest!";
     let index = 0;
 
     const interval = setInterval(() => {
-      if (index < text.length) {
-        user?.name
-          ? setTypedText((prev) => prev + text[index])
-          : setTypedGuest((prev) => prev + text[index]);
+      if (index < targetText.length) {
+        setDisplayText(targetText.slice(0, index + 1));
         index++;
       } else {
         clearInterval(interval);
@@ -25,7 +25,7 @@ const Home = () => {
     }, 80);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user?.name]); // Only depend on user.name to avoid unnecessary re-runs
 
   return (
     <section className="text-gray-700">
@@ -34,11 +34,11 @@ const Home = () => {
       <h1 className="text-3xl sm:text-4xl font-medium text-center text-gray-900 mt-28">
         {user ? (
           <>
-            Welcome, <span className="text-indigo-600">{typedText}</span>
+            Welcome, <span className="text-indigo-600">{displayText}</span>
           </>
         ) : (
           <>
-            Hello, <span className="text-indigo-600">{typedGuest}</span>
+            Hello, <span className="text-indigo-600">{displayText}</span>
           </>
         )}
       </h1>
