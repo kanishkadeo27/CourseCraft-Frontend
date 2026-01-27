@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const CourseCard = ({ course, user }) => {
   const navigate = useNavigate();
+  const [isEnrolled, setIsEnrolled] = useState(course.isEnrolled);
 
   const {
     id,
@@ -12,8 +14,12 @@ const CourseCard = ({ course, user }) => {
     price,
     duration,
     imageId,
-    isEnrolled,
   } = course;
+
+  // Function to handle enrollment
+  const handleEnrollment = () => {
+    setIsEnrolled(true);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -108,7 +114,7 @@ const CourseCard = ({ course, user }) => {
               Register Now
             </button>
           )}
-          {user?.role === "admin" && (
+          {user?.role?.toLowerCase() === "admin" && (
             <button
               onClick={() => navigate(`/admin/courses/manage/${id}`)}
               className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
@@ -116,18 +122,21 @@ const CourseCard = ({ course, user }) => {
               Manage Course
             </button>
           )}
-          {user?.role === "user" && (
+          {user?.role?.toLowerCase() === "user" && (
             <>
-              {!isEnrolled ? (
+              {isEnrolled ? (
                 <button
-                  onClick={() => navigate(`/courses/enroll/${id}`)}
-                  className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                  onClick={() => navigate(`/courses/${id}/classroom`)}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
                 >
-                  Enroll Now
+                  Go to Classroom
                 </button>
               ) : (
-                <button className="w-full bg-gray-400 text-white py-2 px-4 rounded-lg cursor-not-allowed">
-                  Already Enrolled
+                <button
+                  onClick={handleEnrollment}
+                  className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                >
+                  Register Now
                 </button>
               )}
             </>

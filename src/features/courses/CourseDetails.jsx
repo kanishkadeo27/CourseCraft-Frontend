@@ -15,7 +15,7 @@ const CourseDetails = () => {
       trainer: "Mohd Khushhal",
       rating: 4.5,
       duration: 90,
-      price: 0,
+      price: 0, // Free for now
       imageId: 1,
       description:
         "Software training is a crucial aspect of professional development...",
@@ -25,7 +25,7 @@ const CourseDetails = () => {
   if (!course) return <p className="text-center mt-20">Loading...</p>;
 
   return (
-    <section className="banner pt-10 pb-10">
+    <section className="banner pt-2 pb-2">
       <div className="container">
         <div className="row">
 

@@ -1,11 +1,14 @@
 import AppRoutes from './routes/AppRoutes'
 import { AuthProvider } from './context/AuthContext'
+import { ProgressProvider } from './context/ProgressContext'
 
 function App() {
 
   return (
     <AuthProvider>
-      <AppRoutes/>
+      <ProgressProvider>
+        <AppRoutes/>
+      </ProgressProvider>
     </AuthProvider>
   )
 }

@@ -20,6 +20,7 @@ import CourseCatalog from "../features/courses/CourseCatalog";
 import CourseDetails from "../features/courses/CourseDetails";
 import CourseSyllabus from "../features/courses/CourseSyllabus";
 import MyCourses from "../features/courses/MyCourses";
+import Classroom from "../features/courses/Classroom";
 
 // Admin Features
 import CreateCourse from "../features/admin/CreateCourse";
@@ -46,6 +47,13 @@ const AppRoutes = () => {
         <Route path="/courses" element={<CourseCatalog />} />
         <Route path="/courses/:id" element={<CourseDetails />} />
         <Route path="/courses/:id/syllabus" element={<CourseSyllabus />} />
+        
+        {/* Protected Course Routes */}
+        <Route path="/courses/:id/classroom" element={
+          <StudentRoute>
+            <Classroom />
+          </StudentRoute>
+        } />
 
         {/* ================= USER ROUTES ================= */}
         {/* Only authenticated users can access these */}

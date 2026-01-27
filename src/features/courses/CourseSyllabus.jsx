@@ -14,7 +14,7 @@ const CourseSyllabus = () => {
         "Learn Java, Spring Boot, Microservices, AWS, Kafka with real projects.",
       duration: 90,
       trainer: "Mohd Khushhal",
-      price: 0,
+      price: 0, // Free for now
     });
   }, [id]);
 
@@ -23,7 +23,7 @@ const CourseSyllabus = () => {
   }
 
   return (
-    <section className="banner pt-10 pb-10">
+    <section className="banner pt-2 pb-2">
       <div className="container">
         <div className="row justify-content-center align-items-center">
           <div className="col-md-6">

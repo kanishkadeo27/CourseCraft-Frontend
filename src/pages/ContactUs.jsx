@@ -37,7 +37,7 @@ const ContactUs = () => {
   };
 
   return (
-    <section className="min-h-[80vh] flex flex-col items-center justify-start pt-16 px-4 pb-20">
+    <section className="min-h-[80vh] flex flex-col items-center justify-start pt-2 px-4 pb-2">
 
       {/* PAGE TITLE */}
       <h1 className="text-3xl font-normal text-gray-900 mb-10">

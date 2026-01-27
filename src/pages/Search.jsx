@@ -11,6 +11,17 @@ const Search = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Function to handle enrollment
+  const handleEnrollment = (courseId) => {
+    setResults(prevResults => 
+      prevResults.map(course => 
+        course.id === courseId 
+          ? { ...course, isEnrolled: true }
+          : course
+      )
+    );
+  };
+
   // Reset search state when query is cleared
   useEffect(() => {
     if (!query.trim()) {
@@ -39,10 +50,10 @@ const Search = () => {
             courseDescription: "Learn React from scratch with hands-on projects and real-world examples",
             trainer: "John Doe",
             rating: 4.5,
-            price: 2999,
+            price: 0, // Free for now
             duration: 30,
             imageId: 1,
-            isEnrolled: false
+            isEnrolled: false // User not enrolled in this course
           },
           {
             id: 2,
@@ -50,10 +61,10 @@ const Search = () => {
             courseDescription: "Master advanced React concepts including hooks, context, and performance optimization",
             trainer: "Jane Smith",
             rating: 4.8,
-            price: 0,
+            price: 0, // Free for now
             duration: 45,
             imageId: 1,
-            isEnrolled: user?.role === "user" ? true : false
+            isEnrolled: user?.role?.toLowerCase() === "user" ? true : false // User enrolled in this course if they're a user
           }
         ] : query.toLowerCase().includes('javascript') ? [
           {
@@ -62,10 +73,10 @@ const Search = () => {
             courseDescription: "Complete JavaScript course covering ES6+, async programming, and modern frameworks",
             trainer: "Mike Johnson",
             rating: 4.7,
-            price: 1999,
+            price: 0, // Free for now
             duration: 60,
             imageId: 1,
-            isEnrolled: false
+            isEnrolled: user?.role?.toLowerCase() === "user" ? true : false // User enrolled in this course if they're a user
           }
         ] : [];
         
@@ -77,7 +88,7 @@ const Search = () => {
   };
 
   return (
-    <section className="container mx-auto pt-24 px-6 pb-20">
+    <section className="container mx-auto pt-2 pb-2 px-6">
       <div className="max-w-4xl mx-auto">
         
         {/* Search Header */}
@@ -215,7 +226,7 @@ const Search = () => {
                                 Register Now
                               </button>
                             )}
-                            {user?.role === "admin" && (
+                            {user?.role?.toLowerCase() === "admin" && (
                               <button 
                                 onClick={() => navigate(`/admin/courses/manage/${course.id}`)}
                                 className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
@@ -223,18 +234,21 @@ const Search = () => {
                                 Manage Course
                               </button>
                             )}
-                            {user?.role === "user" && (
+                            {user?.role?.toLowerCase() === "user" && (
                               <>
-                                {!course.isEnrolled ? (
+                                {course.isEnrolled ? (
                                   <button 
-                                    onClick={() => navigate(`/courses/enroll/${course.id}`)}
-                                    className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                                    onClick={() => navigate(`/courses/${course.id}/classroom`)}
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
                                   >
-                                    Enroll Now
+                                    Go to Classroom
                                   </button>
                                 ) : (
-                                  <button className="w-full bg-gray-400 text-white py-2 px-4 rounded-lg cursor-not-allowed">
-                                    Already Enrolled
+                                  <button 
+                                    onClick={() => handleEnrollment(course.id)}
+                                    className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
+                                  >
+                                    Register Now
                                   </button>
                                 )}
                               </>
