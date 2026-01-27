@@ -10,22 +10,17 @@ const Footer = () => {
     {/* TOP ROW */}
     <div className="ftr-row footer-top">
 
-      {/* LOGO + SOCIAL */}
+      {/* LOGO + ABOUT */}
       <div className="ftr-col-lg-3">
         <img
           src="/image/navbar-logo.png"
           alt="EduHub"
           className="footer-logo"
         />
-
-        <div className="ftr-footer_social">
-          <ul>
-            <li><img src="/image/footer/facebook.png" alt="fb" /></li>
-            <li><img src="/image/footer/icons8-github-512.png" alt="github" /></li>
-            <li><img src="/image/footer/instagram.png" alt="insta" /></li>
-            <li><img src="/image/footer/linkedin.png" alt="linkedin" /></li>
-          </ul>
-        </div>
+        <p className="footer-description">
+          EduHub is your gateway to quality education. We provide comprehensive courses 
+          and learning resources to help you achieve your academic and professional goals.
+        </p>
       </div>
 
       {/* CONTACT */}
@@ -91,13 +86,17 @@ const Footer = () => {
   )}
 </div>
 
-
-      {/* MOBILE APP */}
+      {/* QUICK INFO */}
       <div className="ftr-col-lg-3">
-        <h4 className="ftr-footer_title">Mobile App</h4>
-        <img src="/image/footer/mobile_1.png" className="app-badge" />
-        <img src="/image/footer/mobile_2.png" className="app-badge" />
+        <h4 className="ftr-footer_title">Quick Info</h4>
+        <div className="quick-info">
+          <p><strong>📚 Course Categories:</strong> Programming, Web Development, Data Science</p>
+          <p><strong>🎓 Students Enrolled:</strong> 1000+</p>
+          <p><strong>👨‍🏫 Expert Instructors:</strong> 50+</p>
+          <p><strong>⏰ Support Hours:</strong> Mon-Fri 9AM-6PM</p>
+        </div>
       </div>
+
 
     </div>
 
