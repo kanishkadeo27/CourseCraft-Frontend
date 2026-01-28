@@ -89,22 +89,6 @@ const Profile = () => {
     setErrorMessage("");
 
     // Frontend validation based on backend constraints
-    if (!user.email.trim()) {
-      setErrorMessage("Email is required");
-      setSubmitStatus('error');
-      setUpdating(false);
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(user.email)) {
-      setErrorMessage("Please enter a valid email address");
-      setSubmitStatus('error');
-      setUpdating(false);
-      return;
-    }
-
     if (user.name.trim().length < 3) {
       setErrorMessage("Name must be at least 3 characters long");
       setSubmitStatus('error');
@@ -127,18 +111,25 @@ const Profile = () => {
     }
 
     try {
-      // Prepare payload
+      // Prepare payload (email is not included since it's not editable)
       const payload = {
         name: user.name.trim(),
-        email: user.email.trim(),
         password: user.password,
       };
 
       console.log("Updating profile:", payload);
       console.log("User ID:", user.id);
+      console.log("User Role:", userRole);
       console.log("Auth Token:", localStorage.getItem("token") ? "Present" : "Missing");
 
-      const response = await fetch("http://localhost:8080/api/user/update", {
+      // Determine API endpoint based on user role
+      const apiEndpoint = userRole === "admin" 
+        ? "http://localhost:8080/api/admin/update"
+        : "http://localhost:8080/api/user/update";
+
+      console.log("Using API endpoint:", apiEndpoint);
+
+      const response = await fetch(apiEndpoint, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -170,11 +161,10 @@ const Profile = () => {
         console.log("Profile updated successfully:", result);
         setSubmitStatus('success');
         
-        // Update the user state with new data
+        // Update the user state with new data (email remains unchanged)
         const updatedUserData = {
           ...authUser,
-          name: user.name.trim(),
-          email: user.email.trim()
+          name: user.name.trim()
         };
         
         // Clear password field after successful update
@@ -187,7 +177,6 @@ const Profile = () => {
         setUser(prev => ({
           ...prev,
           name: user.name.trim(),
-          email: user.email.trim(),
           password: ""
         }));
       } else {
@@ -311,15 +300,13 @@ const Profile = () => {
             <div className="relative mb-4">
               <label className="leading-7 text-sm text-gray-600">
                 Email <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2">(Must be valid email format)</span>
               </label>
               <input
                 type="email"
-                className="w-full bg-white rounded border border-gray-300 py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full bg-gray-100 rounded border border-gray-300 py-2 px-3 text-gray-500 cursor-not-allowed"
                 value={user.email}
-                onChange={(e) => setUser({ ...user, email: e.target.value })}
                 required
-                disabled={updating}
+                disabled={true}
                 placeholder="Enter your email address"
               />
             </div>

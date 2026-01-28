@@ -48,8 +48,8 @@ const AdminNavbar = () => {
           <Link to="/" className={linkClass("/")}>Home</Link>
           <Link to="/search" className={linkClass("/search")}>Search</Link>
           <Link to="/admin/dashboard" className={linkClass("/admin/dashboard")}>Dashboard</Link>
-          <Link to="/admin/analytics" className={linkClass("/admin/analytics")}>Analytics</Link>
-          <Link to="/user/profile" className={linkClass("/user/profile")}>Profile</Link>
+          {/* <Link to="/admin/analytics" className={linkClass("/admin/analytics")}>Analytics</Link> */}
+          <Link to="/admin/profile" className={linkClass("/admin/profile")}>Profile</Link>
 
           <button
             onClick={handleLogout}
@@ -75,8 +75,8 @@ const AdminNavbar = () => {
             <Link className={mobileLinkClass("/")} to="/" onClick={() => setOpen(false)}>Home</Link>
             <Link className={mobileLinkClass("/search")} to="/search" onClick={() => setOpen(false)}>Search</Link>
             <Link className={mobileLinkClass("/admin/dashboard")} to="/admin/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
-            <Link className={mobileLinkClass("/admin/analytics")} to="/admin/analytics" onClick={() => setOpen(false)}>Analytics</Link>
-            <Link className={mobileLinkClass("/user/profile")} to="/user/profile" onClick={() => setOpen(false)}>Profile</Link>
+            {/* <Link className={mobileLinkClass("/admin/analytics")} to="/admin/analytics" onClick={() => setOpen(false)}>Analytics</Link> */}
+            <Link className={mobileLinkClass("/admin/profile")} to="/admin/profile" onClick={() => setOpen(false)}>Profile</Link>
 
             <button
               onClick={() => {

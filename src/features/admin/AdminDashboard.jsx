@@ -80,11 +80,17 @@ const AdminDashboard = () => {
               <a href="/admin/courses/create" className="block w-full text-left px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">
                 + Create New Course
               </a>
+              <a href="/admin/trainer/create" className="block w-full text-left px-4 py-2 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition">
+                �‍🏫 Add Trainer
+              </a>
               <a href="/admin/manage-courses" className="block w-full text-left px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition">
                 📚 Manage Courses
               </a>
               <a href="/admin/users" className="block w-full text-left px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition">
                 👥 Manage Users
+              </a>
+              <a href="/admin/trainers" className="block w-full text-left px-4 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition">
+                🎓 Manage Trainers
               </a>
             </div>
           </div>

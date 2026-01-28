@@ -80,8 +80,8 @@ const Footer = () => {
       <ul>
         <li><Link to="/admin/manage-courses">Manage Courses</Link></li>
         <li><Link to="/admin/users">Manage Users</Link></li>
-        <li><Link to="/admin/analytics">Analytics</Link></li>
-        <li><Link to="/user/profile">Profile</Link></li>
+        {/* <li><Link to="/admin/analytics">Analytics</Link></li> */}
+        <li><Link to="/admin/profile">Profile</Link></li>
       </ul>
     </div>
   )}

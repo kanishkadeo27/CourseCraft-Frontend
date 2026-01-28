@@ -28,7 +28,10 @@ import CreateCourse from "../features/admin/CreateCourse";
 import ManageCourse from "../features/admin/ManageCourse";
 import AdminDashboard from "../features/admin/AdminDashboard";
 import ManageUsers from "../features/admin/ManageUsers";
+import ManageTrainers from "../features/admin/ManageTrainers";
+import ManageTrainer from "../features/admin/ManageTrainer";
 import Analytics from "../features/admin/Analytics";
+import CreateTrainer from "../features/admin/CreateTrainer";
 
 const AppRoutes = () => {
   return (
@@ -90,6 +93,24 @@ const AppRoutes = () => {
           </AdminRoute>
         } />
         
+        <Route path="/admin/trainer/create" element={
+          <AdminRoute>
+            <CreateTrainer />
+          </AdminRoute>
+        } />
+        
+        <Route path="/admin/trainers" element={
+          <AdminRoute>
+            <ManageTrainers />
+          </AdminRoute>
+        } />
+        
+        <Route path="/admin/manage/:id/trainer" element={
+          <AdminRoute>
+            <ManageTrainer />
+          </AdminRoute>
+        } />
+        
         <Route path="/admin/courses/manage/:id" element={
           <AdminRoute>
             <ManageCourse />
@@ -111,6 +132,12 @@ const AppRoutes = () => {
         <Route path="/admin/analytics" element={
           <AdminRoute>
             <Analytics />
+          </AdminRoute>
+        } />
+        
+        <Route path="/admin/profile" element={
+          <AdminRoute>
+            <Profile />
           </AdminRoute>
         } />
 
