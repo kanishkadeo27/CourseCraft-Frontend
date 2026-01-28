@@ -23,7 +23,21 @@ const ManageUsers = () => {
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "" || user.role === roleFilter;
+    
+    // Handle role filtering with ROLE_ prefix
+    let matchesRole = roleFilter === "";
+    if (!matchesRole) {
+      // Normalize both user role and filter for comparison
+      const normalizeRole = (role) => {
+        if (!role) return "";
+        const lowerRole = role.toLowerCase();
+        return lowerRole.startsWith('role_') ? lowerRole.replace('role_', '') : lowerRole;
+      };
+      
+      const userRole = normalizeRole(user.role);
+      const filterRole = normalizeRole(roleFilter);
+      matchesRole = userRole === filterRole;
+    }
     
     return matchesSearch && matchesRole;
   });

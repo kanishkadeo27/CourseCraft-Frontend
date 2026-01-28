@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const Footer = () => {
-  const { user } = useAuth();
+  const { user, getUserRole } = useAuth();
+  const userRole = getUserRole();
    return (
     <footer className="ftr-footer">
   <div className="ftr-container">
@@ -52,7 +53,7 @@ const Footer = () => {
   )}
 
   {/* ================= USER MENU ================= */}
-  {user?.role?.toLowerCase() === "user" && (
+  {userRole === "user" && (
     <div className="menu-grid">
       <ul>
         <li><Link to="/">Home</Link></li>
@@ -68,7 +69,7 @@ const Footer = () => {
   )}
 
   {/* ================= ADMIN MENU ================= */}
-  {user?.role?.toLowerCase() === "admin" && (
+  {userRole === "admin" && (
     <div className="menu-grid">
       <ul>
         <li><Link to="/">Home</Link></li>

@@ -48,16 +48,52 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        // Try to parse error response as JSON, fallback to text
+        // Try to parse error response - read the body only once
         let errorMessage;
+        const contentType = response.headers.get("content-type");
+        
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || `HTTP ${response.status}: Login failed`;
-        } catch {
-          const errorText = await response.text();
-          errorMessage = errorText || `HTTP ${response.status}: Login failed`;
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error;
+          } else {
+            const errorText = await response.text();
+            errorMessage = errorText;
+          }
+        } catch (parseError) {
+          console.error("Error parsing response:", parseError);
+          errorMessage = null;
         }
-        throw new Error(errorMessage);
+        
+        // Provide user-friendly error messages based on status code
+        let userFriendlyMessage;
+        switch (response.status) {
+          case 400:
+            userFriendlyMessage = errorMessage || "Invalid email or password format. Please check your input.";
+            break;
+          case 401:
+            userFriendlyMessage = errorMessage || "Invalid email or password. Please check your credentials and try again.";
+            break;
+          case 403:
+            userFriendlyMessage = errorMessage || "Your account access is restricted. Please contact support if you believe this is an error.";
+            break;
+          case 404:
+            userFriendlyMessage = errorMessage || "Account not found. Please check your email or sign up for a new account.";
+            break;
+          case 429:
+            userFriendlyMessage = errorMessage || "Too many login attempts. Please wait a few minutes before trying again.";
+            break;
+          case 500:
+            userFriendlyMessage = errorMessage || "Server error occurred. Please try again later or contact support.";
+            break;
+          case 503:
+            userFriendlyMessage = errorMessage || "Service temporarily unavailable. Please try again in a few minutes.";
+            break;
+          default:
+            userFriendlyMessage = errorMessage || `Login failed. Please try again or contact support. (Error ${response.status})`;
+        }
+        
+        throw new Error(userFriendlyMessage);
       }
 
       // Handle both JSON and text responses
@@ -119,16 +155,49 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        // Try to parse error response as JSON, fallback to text
+        // Try to parse error response - read the body only once
         let errorMessage;
+        const contentType = response.headers.get("content-type");
+        
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || `HTTP ${response.status}: Registration failed`;
-        } catch {
-          const errorText = await response.text();
-          errorMessage = errorText || `HTTP ${response.status}: Registration failed`;
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error;
+          } else {
+            const errorText = await response.text();
+            errorMessage = errorText;
+          }
+        } catch (parseError) {
+          console.error("Error parsing response:", parseError);
+          errorMessage = null;
         }
-        throw new Error(errorMessage);
+        
+        // Provide user-friendly error messages based on status code
+        let userFriendlyMessage;
+        switch (response.status) {
+          case 400:
+            userFriendlyMessage = errorMessage || "Invalid registration data. Please check all fields and try again.";
+            break;
+          case 409:
+            userFriendlyMessage = errorMessage || "An account with this email already exists. Please use a different email or try logging in.";
+            break;
+          case 422:
+            userFriendlyMessage = errorMessage || "Please check your input. Password must be at least 6 characters long.";
+            break;
+          case 429:
+            userFriendlyMessage = errorMessage || "Too many registration attempts. Please wait a few minutes before trying again.";
+            break;
+          case 500:
+            userFriendlyMessage = errorMessage || "Server error occurred during registration. Please try again later.";
+            break;
+          case 503:
+            userFriendlyMessage = errorMessage || "Registration service temporarily unavailable. Please try again in a few minutes.";
+            break;
+          default:
+            userFriendlyMessage = errorMessage || `Registration failed. Please try again or contact support. (Error ${response.status})`;
+        }
+        
+        throw new Error(userFriendlyMessage);
       }
 
       // Handle both JSON and text responses
@@ -178,9 +247,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper function to normalize role (handles ROLE_USER/ROLE_ADMIN format)
+  const normalizeRole = (role) => {
+    if (!role) return null;
+    const lowerRole = role.toLowerCase();
+    if (lowerRole.startsWith('role_')) {
+      return lowerRole.replace('role_', '');
+    }
+    return lowerRole;
+  };
+
   // Check if user has specific role
   const hasRole = (role) => {
-    return user?.role?.toLowerCase() === role.toLowerCase();
+    if (!user?.role) return false;
+    return normalizeRole(user.role) === normalizeRole(role);
+  };
+
+  // Get normalized user role
+  const getUserRole = () => {
+    return normalizeRole(user?.role);
   };
 
   // Check if user is authenticated
@@ -201,6 +286,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     hasRole,
+    getUserRole,
+    normalizeRole,
     isAuthenticated,
     getAuthHeader
   };

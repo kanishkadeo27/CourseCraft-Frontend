@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import Loader from "./Loader";
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, getUserRole, hasRole } = useAuth();
   const location = useLocation();
 
   // Show loading while checking authentication
@@ -17,9 +17,10 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
   }
 
   // Check role-based access
-  if (requiredRole && user?.role?.toLowerCase() !== requiredRole.toLowerCase()) {
+  if (requiredRole && !hasRole(requiredRole)) {
+    const userRole = getUserRole();
     // Redirect based on user role
-    if (user?.role?.toLowerCase() === "admin") {
+    if (userRole === "admin") {
       return <Navigate to="/admin/dashboard" replace />;
     } else {
       return <Navigate to="/courses" replace />;

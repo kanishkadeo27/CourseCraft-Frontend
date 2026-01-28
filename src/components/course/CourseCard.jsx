@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 const CourseCard = ({ course, user }) => {
@@ -15,6 +15,18 @@ const CourseCard = ({ course, user }) => {
     duration,
     imageId,
   } = course;
+
+  // Helper function to normalize role
+  const normalizeRole = (role) => {
+    if (!role) return null;
+    const lowerRole = role.toLowerCase();
+    if (lowerRole.startsWith('role_')) {
+      return lowerRole.replace('role_', '');
+    }
+    return lowerRole;
+  };
+
+  const userRole = normalizeRole(user?.role);
 
   // Function to handle enrollment
   const handleEnrollment = () => {
@@ -114,7 +126,7 @@ const CourseCard = ({ course, user }) => {
               Register Now
             </button>
           )}
-          {user?.role?.toLowerCase() === "admin" && (
+          {userRole === "admin" && (
             <button
               onClick={() => navigate(`/admin/courses/manage/${id}`)}
               className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors duration-200"
@@ -122,7 +134,7 @@ const CourseCard = ({ course, user }) => {
               Manage Course
             </button>
           )}
-          {user?.role?.toLowerCase() === "user" && (
+          {userRole === "user" && (
             <>
               {isEnrolled ? (
                 <button

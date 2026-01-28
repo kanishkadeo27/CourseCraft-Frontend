@@ -5,7 +5,7 @@ import AdminLayout from "./AdminLayout";
 import Loader from "../components/common/Loader";
 
 const DynamicLayout = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, getUserRole } = useAuth();
 
   if (loading) {
     return <Loader />;
@@ -16,11 +16,13 @@ const DynamicLayout = () => {
     return <GuestLayout />;
   }
 
-  if (user.role?.toLowerCase() === "admin") {
+  const userRole = getUserRole();
+
+  if (userRole === "admin") {
     return <AdminLayout />;
   }
 
-  if (user.role?.toLowerCase() === "user") {
+  if (userRole === "user") {
     return <UserLayout />;
   }
 
