@@ -4,7 +4,8 @@ import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
   // Get user from AuthContext
-  const { user } = useAuth();
+  const { user, getUserRole } = useAuth();
+  const userRole = getUserRole();
 
   const [displayText, setDisplayText] = useState("");
 
@@ -63,12 +64,21 @@ const Home = () => {
           </p>
 
           {user ? (
-            <Link
-              to="/search"
-              className="inline-flex items-center bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded transition"
-            >
-              Search →
-            </Link>
+            userRole === "admin" ? (
+              <Link
+                to="/admin/dashboard"
+                className="inline-flex items-center bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded transition"
+              >
+                Dashboard →
+              </Link>
+            ) : (
+              <Link
+                to="/search"
+                className="inline-flex items-center bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded transition"
+              >
+                Search →
+              </Link>
+            )
           ) : (
             <Link
               to="/login"

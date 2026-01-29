@@ -73,14 +73,14 @@ const Footer = () => {
     <div className="menu-grid">
       <ul>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="/search">Search</Link></li>
         <li><Link to="/admin/dashboard">Dashboard</Link></li>
         <li><Link to="/admin/courses/create">Add Course</Link></li>
+        <li><Link to="/admin/trainer/create">Add Trainer</Link></li>
       </ul>
       <ul>
         <li><Link to="/admin/manage-courses">Manage Courses</Link></li>
+        <li><Link to="/admin/trainers">Manage Trainers</Link></li>
         <li><Link to="/admin/users">Manage Users</Link></li>
-        {/* <li><Link to="/admin/analytics">Analytics</Link></li> */}
         <li><Link to="/admin/profile">Profile</Link></li>
       </ul>
     </div>

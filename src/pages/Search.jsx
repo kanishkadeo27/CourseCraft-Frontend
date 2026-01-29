@@ -1,15 +1,25 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import CourseCard from "../components/course/CourseCard";
 
 const Search = () => {
   const { user, getUserRole } = useAuth();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   const userRole = getUserRole();
+
+  // Redirect admin users to dashboard
+  useEffect(() => {
+    if (userRole === "admin") {
+      navigate("/admin/dashboard");
+      return;
+    }
+  }, [userRole, navigate]);
 
   // Reset search state when query is cleared
   useEffect(() => {
@@ -19,6 +29,11 @@ const Search = () => {
       setIsSearching(false);
     }
   }, [query]);
+
+  // Don't render anything for admin users (they'll be redirected)
+  if (userRole === "admin") {
+    return null;
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();

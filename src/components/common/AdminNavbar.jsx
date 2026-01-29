@@ -46,7 +46,6 @@ const AdminNavbar = () => {
         {/* DESKTOP NAV */}
         <nav className="hidden md:flex items-center space-x-2 ml-auto">
           <Link to="/" className={linkClass("/")}>Home</Link>
-          <Link to="/search" className={linkClass("/search")}>Search</Link>
           <Link to="/admin/dashboard" className={linkClass("/admin/dashboard")}>Dashboard</Link>
           {/* <Link to="/admin/analytics" className={linkClass("/admin/analytics")}>Analytics</Link> */}
           <Link to="/admin/profile" className={linkClass("/admin/profile")}>Profile</Link>
@@ -73,7 +72,6 @@ const AdminNavbar = () => {
         <div className="md:hidden bg-white border-t">
           <nav className="flex flex-col px-4 py-2">
             <Link className={mobileLinkClass("/")} to="/" onClick={() => setOpen(false)}>Home</Link>
-            <Link className={mobileLinkClass("/search")} to="/search" onClick={() => setOpen(false)}>Search</Link>
             <Link className={mobileLinkClass("/admin/dashboard")} to="/admin/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
             {/* <Link className={mobileLinkClass("/admin/analytics")} to="/admin/analytics" onClick={() => setOpen(false)}>Analytics</Link> */}
             <Link className={mobileLinkClass("/admin/profile")} to="/admin/profile" onClick={() => setOpen(false)}>Profile</Link>

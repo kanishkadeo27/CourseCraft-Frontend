@@ -78,7 +78,20 @@ const allCourses = [
 ];
 
 const CourseCatalog = () => {
-  const { user } = useAuth();
+  const { user, getUserRole } = useAuth();
+  const userRole = getUserRole();
+
+  // Helper function to normalize role
+  const normalizeRole = (role) => {
+    if (!role) return null;
+    const lowerRole = role.toLowerCase();
+    if (lowerRole.startsWith('role_')) {
+      return lowerRole.replace('role_', '');
+    }
+    return lowerRole;
+  };
+
+  const normalizedUserRole = normalizeRole(user?.role);
 
   return (
     <section className="pt-2 pb-2 bg-gray-50">
@@ -94,18 +107,20 @@ const CourseCatalog = () => {
               <div key={course.id} className="relative">
                 <CourseCard course={course} user={user} />
                 
-                {/* Enrollment Status Badge */}
-                <div className="absolute top-4 right-4">
-                  {course.isEnrolled ? (
-                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      Enrolled
-                    </span>
-                  ) : (
-                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                      Available
-                    </span>
-                  )}
-                </div>
+                {/* Enrollment Status Badge - Only show for regular users */}
+                {normalizedUserRole === "user" && (
+                  <div className="absolute top-4 right-4">
+                    {course.isEnrolled ? (
+                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Enrolled
+                      </span>
+                    ) : (
+                      <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        Available
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -118,18 +133,24 @@ const CourseCatalog = () => {
               <h3 className="text-3xl font-bold text-indigo-600">{allCourses.length}</h3>
               <p className="text-gray-600 mt-2">Total Courses</p>
             </div>
-            <div>
-              <h3 className="text-3xl font-bold text-green-600">
-                {allCourses.filter(course => course.isEnrolled).length}
-              </h3>
-              <p className="text-gray-600 mt-2">Enrolled Courses</p>
-            </div>
-            <div>
-              <h3 className="text-3xl font-bold text-blue-600">
-                {allCourses.filter(course => !course.isEnrolled).length}
-              </h3>
-              <p className="text-gray-600 mt-2">Available to Enroll</p>
-            </div>
+            
+            {/* Show enrollment statistics only for regular users */}
+            {normalizedUserRole === "user" && (
+              <>
+                <div>
+                  <h3 className="text-3xl font-bold text-green-600">
+                    {allCourses.filter(course => course.isEnrolled).length}
+                  </h3>
+                  <p className="text-gray-600 mt-2">Enrolled Courses</p>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-bold text-blue-600">
+                    {allCourses.filter(course => !course.isEnrolled).length}
+                  </h3>
+                  <p className="text-gray-600 mt-2">Available to Enroll</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
