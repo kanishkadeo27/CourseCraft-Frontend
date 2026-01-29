@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+// import { trainerService } from "../../api";
+// import useApi from "../../hooks/useApi";
 
 const ManageTrainer = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [updating, setUpdating] = useState(false);
   const [trainer, setTrainer] = useState({
     trainerId: "",
     trainerName: "",
@@ -16,22 +18,25 @@ const ManageTrainer = () => {
     imageUrl: "",
   });
 
+  // TODO: Replace with actual API when trainerService is implemented
+  // const { data: trainerData, loading, error: fetchError, execute: fetchTrainer } = useApi(trainerService.getTrainerById);
+  // const { loading: updating, error: updateError, execute: updateTrainer } = useApi(trainerService.updateTrainer);
+
   // Auto-fade messages after 5 seconds
   useEffect(() => {
     if (submitStatus) {
       const timer = setTimeout(() => {
         setSubmitStatus(null);
-        setErrorMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
   }, [submitStatus]);
 
-  // Load trainer data based on ID
+  // Load trainer data based on ID (using mock data for now)
   useEffect(() => {
     const loadTrainer = async () => {
       try {
-        // Mock data - replace with actual API call
+        // Mock data - replace with actual API call when trainerService is implemented
         const mockTrainers = [
           { 
             trainerId: 1, 
@@ -71,7 +76,7 @@ const ManageTrainer = () => {
             trainerName: foundTrainer.trainerName,
             description: foundTrainer.description,
             rating: foundTrainer.rating.toString(),
-            imageUrl: foundTrainer.imageUrl,
+            imageUrl: foundTrainer.imageUrl || "",
           });
         } else {
           setErrorMessage("Trainer not found");
@@ -93,9 +98,9 @@ const ManageTrainer = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUpdating(true);
     setSubmitStatus(null);
     setErrorMessage("");
+    setUpdating(true);
 
     // Frontend validation based on backend Trainer entity constraints
     if (!trainer.trainerName.trim()) {
@@ -156,79 +161,24 @@ const ManageTrainer = () => {
         imageUrl: trainer.imageUrl.trim() || null,
       };
 
-      const response = await fetch(`http://localhost:8080/api/admin/trainers/${trainer.trainerId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        console.log("Trainer updated successfully");
-        setSubmitStatus('success');
-        
-        // Redirect to manage trainers page after 2 seconds
-        setTimeout(() => {
-          navigate("/admin/trainers");
-        }, 2000);
-      } else {
-        // Handle error responses
-        let errorMessage;
-        const contentType = response.headers.get("content-type");
-        
-        try {
-          if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error;
-          } else {
-            const errorText = await response.text();
-            errorMessage = errorText;
-          }
-        } catch (parseError) {
-          console.error("Error parsing error response:", parseError);
-          errorMessage = null;
-        }
-        
-        // Provide user-friendly error messages
-        let userFriendlyMessage;
-        switch (response.status) {
-          case 400:
-            userFriendlyMessage = errorMessage || "Invalid trainer data. Please check all fields and try again.";
-            break;
-          case 401:
-            userFriendlyMessage = errorMessage || "Authentication required. Please log in again.";
-            break;
-          case 403:
-            userFriendlyMessage = errorMessage || "Access denied. You don't have permission to update trainers.";
-            break;
-          case 404:
-            userFriendlyMessage = errorMessage || "Trainer not found.";
-            break;
-          case 409:
-            userFriendlyMessage = errorMessage || "A trainer with this name already exists.";
-            break;
-          case 500:
-            userFriendlyMessage = errorMessage || "Server error occurred. Please try again later.";
-            break;
-          default:
-            userFriendlyMessage = errorMessage || `Failed to update trainer. Please try again. (Error ${response.status})`;
-        }
-        
-        console.error("Trainer update failed:", userFriendlyMessage);
-        setErrorMessage(userFriendlyMessage);
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error("Error updating trainer:", error);
+      // TODO: Replace with actual API call when trainerService is implemented
+      // await updateTrainer(trainer.trainerId, payload);
+      console.log("Would update trainer:", payload);
       
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setErrorMessage("Cannot connect to server. Please check if the backend is running.");
-      } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-      }
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Trainer updated successfully (mock)");
+      setSubmitStatus('success');
+      
+      // Redirect to manage trainers page after 2 seconds
+      setTimeout(() => {
+        navigate("/admin/trainers");
+      }, 2000);
+    } catch (err) {
+      console.error("Error updating trainer:", err);
       setSubmitStatus('error');
+      setErrorMessage(err.message || "Failed to update trainer. Please try again.");
     } finally {
       setUpdating(false);
     }

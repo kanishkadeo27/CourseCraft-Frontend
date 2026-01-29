@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// import { trainerService } from "../../api";
+// import useApi from "../../hooks/useApi";
 
 const CreateTrainer = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
   const [trainer, setTrainer] = useState({
     trainerName: "",
     description: "",
@@ -13,12 +12,17 @@ const CreateTrainer = () => {
     imageUrl: "",
   });
 
+  // TODO: Replace with actual API when trainerService is implemented
+  // const { loading, error, execute: createTrainer } = useApi(trainerService.createTrainer);
+  const [loading, setLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+
   // Auto-fade messages after 5 seconds
   useEffect(() => {
     if (submitStatus) {
       const timer = setTimeout(() => {
         setSubmitStatus(null);
-        setErrorMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -26,9 +30,9 @@ const CreateTrainer = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setSubmitStatus(null);
     setErrorMessage("");
+    setLoading(true);
 
     // Frontend validation based on backend Trainer entity constraints
     if (!trainer.trainerName.trim()) {
@@ -88,84 +92,32 @@ const CreateTrainer = () => {
         imageUrl: trainer.imageUrl.trim() || null,
       };
 
-      const response = await fetch("http://localhost:8080/api/admin/trainers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(payload),
+      // TODO: Replace with actual API call when trainerService is implemented
+      // await createTrainer(payload);
+      console.log("Would create trainer:", payload);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Trainer created successfully (mock)");
+      setSubmitStatus('success');
+      
+      // Reset form after successful creation
+      setTrainer({
+        trainerName: "",
+        description: "",
+        rating: "",
+        imageUrl: "",
       });
 
-      if (response.ok) {
-        console.log("Trainer created successfully");
-        setSubmitStatus('success');
-        
-        // Reset form after successful creation
-        setTrainer({
-          trainerName: "",
-          description: "",
-          rating: "",
-          imageUrl: "",
-        });
-
-        // Redirect to manage trainers page after 2 seconds
-        setTimeout(() => {
-          navigate("/admin/dashboard");
-        }, 2000);
-      } else {
-        // Handle error responses
-        let errorMessage;
-        const contentType = response.headers.get("content-type");
-        
-        try {
-          if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error;
-          } else {
-            const errorText = await response.text();
-            errorMessage = errorText;
-          }
-        } catch (parseError) {
-          console.error("Error parsing error response:", parseError);
-          errorMessage = null;
-        }
-        
-        // Provide user-friendly error messages
-        let userFriendlyMessage;
-        switch (response.status) {
-          case 400:
-            userFriendlyMessage = errorMessage || "Invalid trainer data. Please check all fields and try again.";
-            break;
-          case 401:
-            userFriendlyMessage = errorMessage || "Authentication required. Please log in again.";
-            break;
-          case 403:
-            userFriendlyMessage = errorMessage || "Access denied. You don't have permission to create trainers.";
-            break;
-          case 409:
-            userFriendlyMessage = errorMessage || "A trainer with this name already exists.";
-            break;
-          case 500:
-            userFriendlyMessage = errorMessage || "Server error occurred. Please try again later.";
-            break;
-          default:
-            userFriendlyMessage = errorMessage || `Failed to create trainer. Please try again. (Error ${response.status})`;
-        }
-        
-        console.error("Trainer creation failed:", userFriendlyMessage);
-        setErrorMessage(userFriendlyMessage);
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error("Error creating trainer:", error);
-      
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setErrorMessage("Cannot connect to server. Please check if the backend is running.");
-      } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-      }
+      // Redirect to manage trainers page after 2 seconds
+      setTimeout(() => {
+        navigate("/admin/dashboard");
+      }, 2000);
+    } catch (err) {
+      console.error("Error creating trainer:", err);
       setSubmitStatus('error');
+      setErrorMessage(err.message || "Failed to create trainer. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -246,17 +198,17 @@ const CreateTrainer = () => {
             </div>
           )}
 
-          {/* Error Message */}
-          {submitStatus === 'error' && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded transition-opacity duration-500">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                <span>{errorMessage || "Failed to create trainer. Please try again."}</span>
-              </div>
-            </div>
-          )}
+              {/* Error Message */}
+              {submitStatus === 'error' && (
+                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded transition-opacity duration-500">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <span>{errorMessage || "Failed to create trainer. Please try again."}</span>
+                  </div>
+                </div>
+              )}
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

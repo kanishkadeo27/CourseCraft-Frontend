@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+// import { courseService, trainerService } from "../../api";
+// import useApi from "../../hooks/useApi";
 
 const ManageCourse = () => {
   const { id } = useParams();
@@ -7,7 +9,6 @@ const ManageCourse = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
   const [trainers, setTrainers] = useState([]);
 
   const [course, setCourse] = useState({
@@ -25,23 +26,48 @@ const ManageCourse = () => {
     trainerId: ""
   });
 
-  // Load trainers for dropdown
+  // TODO: Replace with actual API when courseService and trainerService are implemented
+  // const { loading: updating, error, execute: updateCourse } = useApi(courseService.updateCourse);
+  // const { execute: deleteCourse } = useApi(courseService.deleteCourse);
+  // const { execute: fetchTrainers } = useApi(trainerService.getAdminTrainers);
+
+  // Load trainers for dropdown (using mock data for now)
   useEffect(() => {
-    // Mock trainers data (replace with API call)
-    setTrainers([
-      { trainerId: 1, trainerName: "John Smith" },
-      { trainerId: 2, trainerName: "Sarah Johnson" },
-      { trainerId: 3, trainerName: "Mike Wilson" },
-      { trainerId: 4, trainerName: "Emily Davis" },
-      { trainerId: 5, trainerName: "Mohd Khushhal" }
-    ]);
+    const loadTrainers = async () => {
+      try {
+        // TODO: Replace with actual API call when trainerService is implemented
+        // const data = await fetchTrainers();
+        // setTrainers(data || []);
+        
+        // Use mock data for now
+        setTrainers([
+          { trainerId: 1, trainerName: "John Smith" },
+          { trainerId: 2, trainerName: "Sarah Johnson" },
+          { trainerId: 3, trainerName: "Mike Wilson" },
+          { trainerId: 4, trainerName: "Emily Davis" },
+          { trainerId: 5, trainerName: "Mohd Khushhal" }
+        ]);
+      } catch (err) {
+        console.error("Failed to load trainers:", err);
+        // Use mock data as fallback
+        setTrainers([
+          { trainerId: 1, trainerName: "John Smith" },
+          { trainerId: 2, trainerName: "Sarah Johnson" },
+          { trainerId: 3, trainerName: "Mike Wilson" },
+          { trainerId: 4, trainerName: "Emily Davis" },
+          { trainerId: 5, trainerName: "Mohd Khushhal" }
+        ]);
+      }
+    };
+    loadTrainers();
   }, []);
 
-  // Load course data based on ID
+  // Load course data based on ID (using mock data for now)
   useEffect(() => {
     const loadCourse = async () => {
       try {
-        // Mock course data - replace with actual API call
+        // TODO: Replace with actual API call when courseService is implemented
+        // Mock course data
         const mockCourse = {
           courseId: parseInt(id),
           courseName: "Complete Java Development Bootcamp",
@@ -60,7 +86,6 @@ const ManageCourse = () => {
         setCourse(mockCourse);
       } catch (error) {
         console.error("Error loading course:", error);
-        setErrorMessage("Failed to load course data");
         setSubmitStatus('error');
       } finally {
         setLoading(false);
@@ -77,7 +102,6 @@ const ManageCourse = () => {
     if (submitStatus) {
       const timer = setTimeout(() => {
         setSubmitStatus(null);
-        setErrorMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -89,27 +113,23 @@ const ManageCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUpdating(true);
     setSubmitStatus(null);
-    setErrorMessage("");
+    setUpdating(true);
 
     // Frontend validation
     if (!course.courseName.trim()) {
-      setErrorMessage("Course name is required");
       setSubmitStatus('error');
       setUpdating(false);
       return;
     }
 
     if (!course.description.trim()) {
-      setErrorMessage("Course description is required");
       setSubmitStatus('error');
       setUpdating(false);
       return;
     }
 
     if (!course.trainerId) {
-      setErrorMessage("Please select a trainer");
       setSubmitStatus('error');
       setUpdating(false);
       return;
@@ -131,34 +151,23 @@ const ManageCourse = () => {
         trainerId: parseInt(course.trainerId)
       };
 
-      console.log("Updating course:", payload);
+      console.log("Would update course:", payload);
 
-      // Replace with actual API call
-      const response = await fetch(`http://localhost:8080/api/admin/courses/${course.courseId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        console.log("Course updated successfully");
-        setSubmitStatus('success');
-        
-        // Redirect to courses list after 2 seconds
-        setTimeout(() => {
-          navigate("/admin/manage-courses");
-        }, 2000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setErrorMessage(errorData.message || "Failed to update course");
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error("Error updating course:", error);
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      // TODO: Replace with actual API call when courseService is implemented
+      // await updateCourse(course.courseId, payload);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Course updated successfully (mock)");
+      setSubmitStatus('success');
+      
+      // Redirect to courses list after 2 seconds
+      setTimeout(() => {
+        navigate("/admin/manage-courses");
+      }, 2000);
+    } catch (err) {
+      console.error("Error updating course:", err);
       setSubmitStatus('error');
     } finally {
       setUpdating(false);
@@ -168,24 +177,14 @@ const ManageCourse = () => {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
       try {
-        const response = await fetch(`http://localhost:8080/api/admin/courses/${course.courseId}`, {
-          method: "DELETE",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-          }
-        });
-
-        if (response.ok) {
-          console.log("Course deleted successfully");
-          navigate("/admin/manage-courses");
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-          setErrorMessage(errorData.message || "Failed to delete course");
-          setSubmitStatus('error');
-        }
-      } catch (error) {
-        console.error("Error deleting course:", error);
-        setErrorMessage("An unexpected error occurred while deleting the course.");
+        // TODO: Replace with actual API call when courseService is implemented
+        // await deleteCourse(course.courseId);
+        console.log("Would delete course:", course.courseId);
+        
+        console.log("Course deleted successfully (mock)");
+        navigate("/admin/manage-courses");
+      } catch (err) {
+        console.error("Error deleting course:", err);
         setSubmitStatus('error');
       }
     }
@@ -232,7 +231,7 @@ const ManageCourse = () => {
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
-                <span>{errorMessage || "Failed to update course. Please try again."}</span>
+                <span>Failed to update course. Please try again.</span>
               </div>
             </div>
           )}

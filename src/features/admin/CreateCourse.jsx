@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+// import { courseService, trainerService } from "../../api";
+// import useApi from "../../hooks/useApi";
 
 const CreateCourse = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [trainers, setTrainers] = useState([]);
   
   const [course, setCourse] = useState({
@@ -22,16 +23,39 @@ const CreateCourse = () => {
     trainerId: ""
   });
 
-  // Load trainers for dropdown
+  // TODO: Replace with actual API when courseService and trainerService are implemented
+  // const { loading, error, execute: createCourse } = useApi(courseService.createCourse);
+  // const { execute: fetchTrainers } = useApi(trainerService.getAdminTrainers);
+
+  // Load trainers for dropdown (using mock data for now)
   useEffect(() => {
-    // Mock trainers data (replace with API call)
-    setTrainers([
-      { trainerId: 1, trainerName: "John Smith" },
-      { trainerId: 2, trainerName: "Sarah Johnson" },
-      { trainerId: 3, trainerName: "Mike Wilson" },
-      { trainerId: 4, trainerName: "Emily Davis" },
-      { trainerId: 5, trainerName: "Mohd Khushhal" }
-    ]);
+    const loadTrainers = async () => {
+      try {
+        // TODO: Replace with actual API call when trainerService is implemented
+        // const data = await fetchTrainers();
+        // setTrainers(data || []);
+        
+        // Use mock data for now
+        setTrainers([
+          { trainerId: 1, trainerName: "John Smith" },
+          { trainerId: 2, trainerName: "Sarah Johnson" },
+          { trainerId: 3, trainerName: "Mike Wilson" },
+          { trainerId: 4, trainerName: "Emily Davis" },
+          { trainerId: 5, trainerName: "Mohd Khushhal" }
+        ]);
+      } catch (err) {
+        console.error("Failed to load trainers:", err);
+        // Use mock data as fallback
+        setTrainers([
+          { trainerId: 1, trainerName: "John Smith" },
+          { trainerId: 2, trainerName: "Sarah Johnson" },
+          { trainerId: 3, trainerName: "Mike Wilson" },
+          { trainerId: 4, trainerName: "Emily Davis" },
+          { trainerId: 5, trainerName: "Mohd Khushhal" }
+        ]);
+      }
+    };
+    loadTrainers();
   }, []);
 
   // Auto-fade messages after 5 seconds
@@ -39,7 +63,6 @@ const CreateCourse = () => {
     if (submitStatus) {
       const timer = setTimeout(() => {
         setSubmitStatus(null);
-        setErrorMessage("");
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -54,27 +77,23 @@ const CreateCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setSubmitStatus(null);
-    setErrorMessage("");
+    setLoading(true);
 
     // Frontend validation
     if (!course.courseName.trim()) {
-      setErrorMessage("Course name is required");
       setSubmitStatus('error');
       setLoading(false);
       return;
     }
 
     if (!course.description.trim()) {
-      setErrorMessage("Course description is required");
       setSubmitStatus('error');
       setLoading(false);
       return;
     }
 
     if (!course.trainerId) {
-      setErrorMessage("Please select a trainer");
       setSubmitStatus('error');
       setLoading(false);
       return;
@@ -95,49 +114,38 @@ const CreateCourse = () => {
         trainerId: parseInt(course.trainerId)
       };
 
-      console.log("Creating course:", payload);
+      console.log("Would create course:", payload);
 
-      // Replace with actual API call
-      const response = await fetch("http://localhost:8080/api/admin/courses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(payload),
+      // TODO: Replace with actual API call when courseService is implemented
+      // await createCourse(payload);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log("Course created successfully (mock)");
+      setSubmitStatus('success');
+      
+      // Reset form after successful creation
+      setCourse({
+        courseName: "",
+        description: "",
+        backgroundImage: "",
+        rating: "",
+        duration: "",
+        price: "",
+        courseMode: "Online",
+        studentsEnrolled: "",
+        courseTopic: "",
+        courseSubtopic: "",
+        trainerId: ""
       });
 
-      if (response.ok) {
-        console.log("Course created successfully");
-        setSubmitStatus('success');
-        
-        // Reset form after successful creation
-        setCourse({
-          courseName: "",
-          description: "",
-          backgroundImage: "",
-          rating: "",
-          duration: "",
-          price: "",
-          courseMode: "Online",
-          studentsEnrolled: "",
-          courseTopic: "",
-          courseSubtopic: "",
-          trainerId: ""
-        });
-
-        // Redirect to courses list after 2 seconds
-        setTimeout(() => {
-          navigate("/admin/manage-courses");
-        }, 2000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setErrorMessage(errorData.message || "Failed to create course");
-        setSubmitStatus('error');
-      }
-    } catch (error) {
-      console.error("Error creating course:", error);
-      setErrorMessage("An unexpected error occurred. Please try again.");
+      // Redirect to courses list after 2 seconds
+      setTimeout(() => {
+        navigate("/admin/manage-courses");
+      }, 2000);
+    } catch (err) {
+      console.error("Error creating course:", err);
       setSubmitStatus('error');
     } finally {
       setLoading(false);
@@ -175,7 +183,7 @@ const CreateCourse = () => {
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
-                <span>{errorMessage || "Failed to create course. Please try again."}</span>
+                <span>Failed to create course. Please try again.</span>
               </div>
             </div>
           )}

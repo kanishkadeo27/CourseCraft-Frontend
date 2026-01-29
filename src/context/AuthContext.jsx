@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { authService } from "../api";
 
 const AuthContext = createContext();
 
@@ -38,76 +39,8 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log("Login attempt for:", email);
       
-      // Make API call to backend
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        // Try to parse error response - read the body only once
-        let errorMessage;
-        const contentType = response.headers.get("content-type");
-        
-        try {
-          if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error;
-          } else {
-            const errorText = await response.text();
-            errorMessage = errorText;
-          }
-        } catch (parseError) {
-          console.error("Error parsing response:", parseError);
-          errorMessage = null;
-        }
-        
-        // Provide user-friendly error messages based on status code
-        let userFriendlyMessage;
-        switch (response.status) {
-          case 400:
-            userFriendlyMessage = errorMessage || "Invalid email or password format. Please check your input.";
-            break;
-          case 401:
-            userFriendlyMessage = errorMessage || "Invalid email or password. Please check your credentials and try again.";
-            break;
-          case 403:
-            userFriendlyMessage = errorMessage || "Your account access is restricted. Please contact support if you believe this is an error.";
-            break;
-          case 404:
-            userFriendlyMessage = errorMessage || "Account not found. Please check your email or sign up for a new account.";
-            break;
-          case 429:
-            userFriendlyMessage = errorMessage || "Too many login attempts. Please wait a few minutes before trying again.";
-            break;
-          case 500:
-            userFriendlyMessage = errorMessage || "Server error occurred. Please try again later or contact support.";
-            break;
-          case 503:
-            userFriendlyMessage = errorMessage || "Service temporarily unavailable. Please try again in a few minutes.";
-            break;
-          default:
-            userFriendlyMessage = errorMessage || `Login failed. Please try again or contact support. (Error ${response.status})`;
-        }
-        
-        throw new Error(userFriendlyMessage);
-      }
-
-      // Handle both JSON and text responses
-      let data;
-      const contentType = response.headers.get("content-type");
-      
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        // Backend returned plain text - this shouldn't happen for login
-        const textResponse = await response.text();
-        throw new Error("Invalid response format from server");
-      }
-
+      // Use authService for API call
+      const data = await authService.login({ email, password });
       console.log("Login response:", data);
 
       // Handle different possible response structures from backend
@@ -132,10 +65,40 @@ export const AuthProvider = ({ children }) => {
       return data;
     } catch (error) {
       console.error("Login error:", error);
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error("Cannot connect to server. Please check if the backend is running.");
+      
+      // Provide user-friendly error messages based on status code
+      let userFriendlyMessage;
+      if (error.status) {
+        switch (error.status) {
+          case 400:
+            userFriendlyMessage = error.message || "Invalid email or password format. Please check your input.";
+            break;
+          case 401:
+            userFriendlyMessage = error.message || "Invalid email or password. Please check your credentials and try again.";
+            break;
+          case 403:
+            userFriendlyMessage = error.message || "Your account access is restricted. Please contact support if you believe this is an error.";
+            break;
+          case 404:
+            userFriendlyMessage = error.message || "Account not found. Please check your email or sign up for a new account.";
+            break;
+          case 429:
+            userFriendlyMessage = error.message || "Too many login attempts. Please wait a few minutes before trying again.";
+            break;
+          case 500:
+            userFriendlyMessage = error.message || "Server error occurred. Please try again later or contact support.";
+            break;
+          case 503:
+            userFriendlyMessage = error.message || "Service temporarily unavailable. Please try again in a few minutes.";
+            break;
+          default:
+            userFriendlyMessage = error.message || `Login failed. Please try again or contact support. (Error ${error.status})`;
+        }
+      } else {
+        userFriendlyMessage = error.message || "Cannot connect to server. Please check if the backend is running.";
       }
-      throw new Error(error.message || "Login failed");
+      
+      throw new Error(userFriendlyMessage);
     }
   };
 
@@ -144,82 +107,43 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log("Registration attempt for:", email);
       
-      const userData = { name, email, password };
-
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        // Try to parse error response - read the body only once
-        let errorMessage;
-        const contentType = response.headers.get("content-type");
-        
-        try {
-          if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorData.error;
-          } else {
-            const errorText = await response.text();
-            errorMessage = errorText;
-          }
-        } catch (parseError) {
-          console.error("Error parsing response:", parseError);
-          errorMessage = null;
-        }
-        
-        // Provide user-friendly error messages based on status code
-        let userFriendlyMessage;
-        switch (response.status) {
-          case 400:
-            userFriendlyMessage = errorMessage || "Invalid registration data. Please check all fields and try again.";
-            break;
-          case 409:
-            userFriendlyMessage = errorMessage || "An account with this email already exists. Please use a different email or try logging in.";
-            break;
-          case 422:
-            userFriendlyMessage = errorMessage || "Please check your input. Password must be at least 6 characters long.";
-            break;
-          case 429:
-            userFriendlyMessage = errorMessage || "Too many registration attempts. Please wait a few minutes before trying again.";
-            break;
-          case 500:
-            userFriendlyMessage = errorMessage || "Server error occurred during registration. Please try again later.";
-            break;
-          case 503:
-            userFriendlyMessage = errorMessage || "Registration service temporarily unavailable. Please try again in a few minutes.";
-            break;
-          default:
-            userFriendlyMessage = errorMessage || `Registration failed. Please try again or contact support. (Error ${response.status})`;
-        }
-        
-        throw new Error(userFriendlyMessage);
-      }
-
-      // Handle both JSON and text responses
-      let data;
-      const contentType = response.headers.get("content-type");
-      
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      } else {
-        // Backend returned plain text
-        const textResponse = await response.text();
-        data = { message: textResponse };
-      }
-      
+      // Use authService for API call
+      const data = await authService.register({ name, email, password });
       console.log("Registration response:", data);
       return data;
     } catch (error) {
       console.error("Registration error:", error);
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error("Cannot connect to server. Please check if the backend is running.");
+      
+      // Provide user-friendly error messages based on status code
+      let userFriendlyMessage;
+      if (error.status) {
+        switch (error.status) {
+          case 400:
+            userFriendlyMessage = error.message || "Invalid registration data. Please check all fields and try again.";
+            break;
+          case 409:
+            userFriendlyMessage = error.message || "An account with this email already exists. Please use a different email or try logging in.";
+            break;
+          case 422:
+            userFriendlyMessage = error.message || "Please check your input. Password must be at least 6 characters long.";
+            break;
+          case 429:
+            userFriendlyMessage = error.message || "Too many registration attempts. Please wait a few minutes before trying again.";
+            break;
+          case 500:
+            userFriendlyMessage = error.message || "Server error occurred during registration. Please try again later.";
+            break;
+          case 503:
+            userFriendlyMessage = error.message || "Registration service temporarily unavailable. Please try again in a few minutes.";
+            break;
+          default:
+            userFriendlyMessage = error.message || `Registration failed. Please try again or contact support. (Error ${error.status})`;
+        }
+      } else {
+        userFriendlyMessage = error.message || "Cannot connect to server. Please check if the backend is running.";
       }
-      throw new Error(error.message || "Registration failed");
+      
+      throw new Error(userFriendlyMessage);
     }
   };
 
@@ -227,24 +151,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     console.log("Logging out user...");
     
-    try {
-      // Optional: Call backend logout if you have the endpoint
-      // const token = localStorage.getItem("token");
-      // if (token) {
-      //   await fetch("/api/auth/logout", {
-      //     method: "POST",
-      //     headers: { "Authorization": `Bearer ${token}` }
-      //   });
-      // }
-    } catch (error) {
-      console.warn("Backend logout failed:", error.message);
-    } finally {
-      // Always clear local storage and user state
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      setUser(null);
-      console.log("Local storage cleared, user logged out");
-    }
+    // Clear local storage and user state
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    console.log("Local storage cleared, user logged out");
   };
 
   // Helper function to normalize role (handles ROLE_USER/ROLE_ADMIN format)

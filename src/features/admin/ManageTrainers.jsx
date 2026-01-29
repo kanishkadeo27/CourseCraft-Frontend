@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+// import { trainerService } from "../../api";
+// import useApi from "../../hooks/useApi";
 
 const ManageTrainers = () => {
   const [trainers, setTrainers] = useState([]);
@@ -6,7 +8,11 @@ const ManageTrainers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [ratingFilter, setRatingFilter] = useState("");
 
-  // Mock trainers data (replace with real API call)
+  // TODO: Replace with actual API when trainerService is implemented
+  // const { data: trainersData, loading, error, execute: fetchTrainers } = useApi(trainerService.getAdminTrainers);
+  // const { execute: deleteTrainer } = useApi(trainerService.deleteTrainer);
+
+  // Load trainers on component mount (using mock data for now)
   useEffect(() => {
     // Simulate API call
     setTimeout(() => {
@@ -58,15 +64,36 @@ const ManageTrainers = () => {
     return matchesSearch && matchesRating;
   });
 
-  const handleRatingChange = (trainerId, newRating) => {
-    setTrainers(trainers.map(trainer =>
-      trainer.trainerId === trainerId ? { ...trainer, rating: parseFloat(newRating) } : trainer
-    ));
+  const handleRatingChange = async (trainerId, newRating) => {
+    try {
+      // TODO: Replace with actual API call when trainerService is implemented
+      // const trainer = trainers.find(t => t.trainerId === trainerId);
+      // const updatedTrainer = { ...trainer, rating: parseFloat(newRating) };
+      // await trainerService.updateTrainer(trainerId, updatedTrainer);
+      
+      console.log("Would update trainer rating:", trainerId, newRating);
+      
+      setTrainers(trainers.map(trainer =>
+        trainer.trainerId === trainerId ? { ...trainer, rating: parseFloat(newRating) } : trainer
+      ));
+    } catch (error) {
+      console.error("Error updating trainer rating:", error);
+      alert("Failed to update trainer rating. Please try again.");
+    }
   };
 
-  const handleDeleteTrainer = (trainerId) => {
+  const handleDeleteTrainer = async (trainerId) => {
     if (window.confirm('Are you sure you want to delete this trainer?')) {
-      setTrainers(trainers.filter(trainer => trainer.trainerId !== trainerId));
+      try {
+        // TODO: Replace with actual API call when trainerService is implemented
+        // await deleteTrainer(trainerId);
+        console.log("Would delete trainer:", trainerId);
+        
+        setTrainers(trainers.filter(trainer => trainer.trainerId !== trainerId));
+      } catch (error) {
+        console.error("Error deleting trainer:", error);
+        alert("Failed to delete trainer. Please try again.");
+      }
     }
   };
 
