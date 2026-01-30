@@ -62,20 +62,20 @@ const Search = () => {
       const data = await searchService.searchCourses(searchQuery.trim());
       
       // Handle different possible response structures
-      const courses = data.courses || data.data || data || [];
+      const courses = data.data;
       
       // Map the response to match our CourseCard component expectations
       const mappedResults = courses.map(course => ({
-        id: course.id || course.courseId,
-        courseName: course.courseName || course.name || course.title,
-        courseDescription: course.courseDescription || course.description,
-        trainer: course.trainer?.name || course.trainerName || course.instructor || "Unknown Instructor",
-        trainerImage: course.trainer?.imageUrl || null,
-        rating: course.trainer?.rating || course.rating || 0,
-        price: course.price || 0,
-        duration: course.duration || 0,
-        imageId: course.thumbnailUrl || course.imageUrl || course.imageId || 1,
-        isEnrolled: course.enrolled || course.isEnrolled || false
+        id: course.id,
+        courseName: course.title,
+        courseDescription: course.description,
+        trainer: course.trainer.name,
+        trainerImage: course.trainer.imageUrl,
+        rating: course.trainer.rating,
+        price: course.price,
+        duration: course.duration,
+        imageId: course.thumbnailUrl,
+        isEnrolled: course.enrolled
       }));
 
       setResults(mappedResults);
@@ -86,8 +86,7 @@ const Search = () => {
       setHasSearched(true);
       
       // Show user-friendly error message
-      const errorMessage = error.message || "Search failed. Please try again.";
-      alert(errorMessage);
+      alert(error.message);
     } finally {
       setIsSearching(false);
     }

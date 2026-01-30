@@ -20,7 +20,7 @@ const PdfViewerPage = () => {
         // Map API response to component expectations
         const mappedCourse = {
           id: parseInt(id),
-          courseName: data.title || data.courseName,
+          courseName: data.title,
           pdfs: data.syllabus?.lessons?.flatMap(lesson => 
             lesson.materials?.filter(material => material.type === 'PDF').map(pdf => ({
               id: pdf.id,

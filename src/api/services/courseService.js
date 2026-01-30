@@ -24,7 +24,7 @@ const courseService = {
   // Enroll in a course (requires authentication)
   enrollInCourse: async (courseId) => {
     try {
-      const response = await apiClient.post(`/user/courses/${courseId}/enroll`);
+      const response = await apiClient.post(`/user/enroll?courseId=${courseId}`);
       return response.data;
     } catch (error) {
       throw error;

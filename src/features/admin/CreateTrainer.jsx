@@ -5,7 +5,7 @@ import { adminService } from "../../api";
 const CreateTrainer = () => {
   const navigate = useNavigate();
   const [trainer, setTrainer] = useState({
-    trainerName: "",
+    name: "",
     description: "",
     rating: "",
     imageUrl: "",
@@ -14,6 +14,16 @@ const CreateTrainer = () => {
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+
+  // Debug: Check user authentication on component mount
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    
+    if (!user.role || !user.role.toLowerCase().includes('admin')) {
+      // User may not have admin privileges
+    }
+  }, []);
 
   // Auto-fade messages after 5 seconds
   useEffect(() => {
@@ -31,21 +41,21 @@ const CreateTrainer = () => {
     setErrorMessage("");
     setLoading(true);
 
-    if (!trainer.trainerName.trim()) {
+    if (!trainer.name.trim()) {
       setErrorMessage("Trainer name is required");
       setSubmitStatus('error');
       setLoading(false);
       return;
     }
 
-    if (trainer.trainerName.trim().length < 3) {
+    if (trainer.name.trim().length < 3) {
       setErrorMessage("Trainer name must be at least 3 characters long");
       setSubmitStatus('error');
       setLoading(false);
       return;
     }
 
-    if (trainer.trainerName.trim().length > 200) {
+    if (trainer.name.trim().length > 200) {
       setErrorMessage("Trainer name cannot exceed 200 characters");
       setSubmitStatus('error');
       setLoading(false);
@@ -73,8 +83,22 @@ const CreateTrainer = () => {
       return;
     }
 
-    if (trainer.rating && (isNaN(trainer.rating) || trainer.rating < 0.0 || trainer.rating > 5.0)) {
+    if (!trainer.rating || trainer.rating === "") {
+      setErrorMessage("Rating is required");
+      setSubmitStatus('error');
+      setLoading(false);
+      return;
+    }
+
+    if (isNaN(trainer.rating) || trainer.rating < 0.0 || trainer.rating > 5.0) {
       setErrorMessage("Rating must be a number between 0.0 and 5.0");
+      setSubmitStatus('error');
+      setLoading(false);
+      return;
+    }
+
+    if (!trainer.imageUrl.trim()) {
+      setErrorMessage("Image URL is required");
       setSubmitStatus('error');
       setLoading(false);
       return;
@@ -82,10 +106,10 @@ const CreateTrainer = () => {
 
     try {
       const payload = {
-        trainerName: trainer.trainerName.trim(),
+        name: trainer.name.trim(),
         description: trainer.description.trim(),
-        rating: trainer.rating ? parseFloat(trainer.rating) : 4.5,
-        imageUrl: trainer.imageUrl.trim() || null,
+        rating: parseFloat(trainer.rating),
+        imageUrl: trainer.imageUrl.trim(),
       };
 
       await adminService.createTrainer(payload);
@@ -93,7 +117,7 @@ const CreateTrainer = () => {
       setSubmitStatus('success');
       
       setTrainer({
-        trainerName: "",
+        name: "",
         description: "",
         rating: "",
         imageUrl: "",
@@ -104,7 +128,20 @@ const CreateTrainer = () => {
       }, 2000);
     } catch (err) {
       setSubmitStatus('error');
-      setErrorMessage(err.message || "Failed to create trainer. Please try again.");
+      
+      let errorMessage = 'Failed to create trainer. Please try again.';
+      
+      if (err.status === 403) {
+        errorMessage = 'Access denied. You may not have permission to create trainers. Please check if you are logged in as an admin.';
+      } else if (err.status === 401) {
+        errorMessage = 'Authentication required. Please login again as an admin.';
+      } else if (err.status === 400) {
+        errorMessage = `Invalid data: ${err.message}`;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setErrorMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -123,26 +160,25 @@ const CreateTrainer = () => {
         <div className="bg-white rounded-lg shadow p-8">
           
           {/* Trainer Preview */}
-          {(trainer.trainerName || trainer.description || trainer.imageUrl || trainer.rating) && (
+          {(trainer.name || trainer.description || trainer.rating) && (
             <div className="mb-8 p-6 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Trainer Preview</h3>
               <div className="flex items-start space-x-4">
-                {/* Trainer Image */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={trainer.imageUrl || "/image/teachers/author1.jpg"}
-                    alt={trainer.trainerName || "Trainer"}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                    onError={(e) => {
-                      e.target.src = "/image/teachers/author1.jpg";
-                    }}
-                  />
-                </div>
+                {/* Trainer Image - Only show if URL is provided */}
+                {trainer.imageUrl && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={trainer.imageUrl}
+                      alt={trainer.name || "Trainer"}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  </div>
+                )}
                 
                 {/* Trainer Info */}
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold text-gray-900">
-                    {trainer.trainerName || "Trainer Name"}
+                    {trainer.name || "Trainer Name"}
                   </h4>
                   
                   {/* Rating */}
@@ -231,8 +267,8 @@ const CreateTrainer = () => {
                 </label>
                 <input
                   type="text"
-                  value={trainer.trainerName}
-                  onChange={(e) => setTrainer({ ...trainer, trainerName: e.target.value })}
+                  value={trainer.name}
+                  onChange={(e) => setTrainer({ ...trainer, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Enter trainer's full name (3-200 characters)"
                   required
@@ -245,7 +281,7 @@ const CreateTrainer = () => {
               {/* Rating */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rating <span className="text-gray-500">(0.0-5.0, default: 4.5)</span>
+                  Rating <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -255,7 +291,8 @@ const CreateTrainer = () => {
                   value={trainer.rating}
                   onChange={(e) => setTrainer({ ...trainer, rating: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="4.5"
+                  placeholder="Enter rating (0.0-5.0)"
+                  required
                   disabled={loading}
                 />
               </div>
@@ -263,7 +300,7 @@ const CreateTrainer = () => {
               {/* Trainer Image URL */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Trainer Image URL
+                  Trainer Image URL <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="url"
@@ -271,10 +308,11 @@ const CreateTrainer = () => {
                   onChange={(e) => setTrainer({ ...trainer, imageUrl: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="https://example.com/trainer-photo.jpg"
+                  required
                   disabled={loading}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Provide a URL to the trainer's profile image. Leave empty to use default image.
+                  Provide a URL to the trainer's profile image.
                 </p>
               </div>
 

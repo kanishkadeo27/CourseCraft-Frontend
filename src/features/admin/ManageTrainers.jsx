@@ -46,8 +46,8 @@ const ManageTrainers = () => {
   }, [message]);
 
   const filteredTrainers = trainers.filter(trainer => {
-    const matchesSearch = (trainer.trainerName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (trainer.description || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = trainer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         trainer.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     let matchesRating = ratingFilter === "";
     if (!matchesRating && trainer.rating !== null && trainer.rating !== undefined) {
@@ -58,33 +58,6 @@ const ManageTrainers = () => {
     
     return matchesSearch && matchesRating;
   });
-
-  const handleRatingChange = async (trainerId, newRating) => {
-    const originalTrainer = trainers.find(t => t.trainerId === trainerId);
-    
-    try {
-      // Update local state immediately for better UX
-      setTrainers(trainers.map(trainer =>
-        trainer.trainerId === trainerId ? { ...trainer, rating: parseFloat(newRating) } : trainer
-      ));
-      
-      // Call API to persist the change with full trainer data
-      const payload = {
-        trainerName: originalTrainer.trainerName,
-        description: originalTrainer.description,
-        rating: parseFloat(newRating),
-        imageUrl: originalTrainer.imageUrl || null
-      };
-      
-      await adminService.updateTrainer(trainerId, payload);
-      
-      setMessage({ type: 'success', text: 'Trainer rating updated successfully!' });
-    } catch (error) {
-      // Revert local state on error
-      await loadTrainers();
-      setMessage({ type: 'error', text: error.message || 'Failed to update trainer rating. Please try again.' });
-    }
-  };
 
   const handleDeleteTrainer = async (trainerId) => {
     try {
@@ -104,8 +77,8 @@ const ManageTrainers = () => {
   const openDeleteModal = (trainer) => {
     setConfirmModal({
       isOpen: true,
-      trainerId: trainer.trainerId,
-      trainerName: trainer.trainerName
+      trainerId: trainer.id,
+      trainerName: trainer.name
     });
   };
 
@@ -215,21 +188,20 @@ const ManageTrainers = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredTrainers.map((trainer) => (
-                  <tr key={trainer.trainerId} className="hover:bg-gray-50">
+                  <tr key={trainer.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           <img
-                            src={trainer.imageUrl || "/image/teachers/author1.jpg"}
-                            alt={trainer.trainerName}
+                            src={trainer.imageUrl}
+                            alt={trainer.name}
                             className="h-10 w-10 rounded-full object-cover"
-                            onError={(e) => {
-                              e.target.src = "/image/teachers/author1.jpg";
-                            }}
                           />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{trainer.trainerName}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {trainer.name}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -242,7 +214,7 @@ const ManageTrainers = () => {
                       <div className="flex items-center">
                         <div className="flex text-yellow-400 mr-2">
                           {[1, 2, 3, 4, 5].map((star) => {
-                            const rating = parseFloat(trainer.rating) || 0;
+                            const rating = parseFloat(trainer.rating);
                             const filled = rating >= star;
                             const partiallyFilled = rating > star - 1 && rating < star;
                             const fillPercentage = partiallyFilled ? ((rating - (star - 1)) * 100) : 0;
@@ -277,21 +249,12 @@ const ManageTrainers = () => {
                             );
                           })}
                         </div>
-                        <span className="text-gray-600 text-sm mr-3">{trainer.rating || '0.0'}</span>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          value={trainer.rating}
-                          onChange={(e) => handleRatingChange(trainer.trainerId, e.target.value)}
-                          className="w-16 text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <span className="text-gray-600 text-sm">{trainer.rating}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
-                        onClick={() => handleManageTrainer(trainer.trainerId)}
+                        onClick={() => handleManageTrainer(trainer.id)}
                         className="mr-3 px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded text-xs font-medium transition-colors"
                       >
                         Manage

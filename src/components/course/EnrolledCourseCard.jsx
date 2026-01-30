@@ -34,11 +34,6 @@ const EnrolledCourseCard = ({ course }) => {
     return imageId;
   };
 
-  // Function to handle image load errors
-  const handleImageError = () => {
-    // Silent error handling - image will show broken image icon
-  };
-
   // Star Rating Component
   const StarRating = ({ rating }) => {
     return (
@@ -92,7 +87,6 @@ const EnrolledCourseCard = ({ course }) => {
         <img
           src={getImageSrc(imageId)}
           alt={courseName}
-          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
@@ -183,7 +177,11 @@ const EnrolledCourseCard = ({ course }) => {
         {/* Action Button */}
         <div className="flex gap-3">
           <button 
-            onClick={() => navigate(`/courses/${id}/classroom`)}
+            onClick={() => navigate(`/courses/${id}/classroom`, { 
+              state: { 
+                courseData: course 
+              } 
+            })}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-xl font-medium transition-colors duration-200"
           >
             {progress === 100 ? 'Review Course' : 'Continue Learning'}

@@ -26,9 +26,15 @@ const CourseCatalog = () => {
     const fetchCourses = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const data = await searchService.getAllCourses();
         
         const coursesData = data.data;
+        
+        if (!coursesData || !Array.isArray(coursesData)) {
+          throw new Error('Invalid course data received from server');
+        }
         
         // Map the API response to match our CourseCard component expectations
         const mappedCourses = coursesData.map(course => ({
@@ -77,6 +83,7 @@ const CourseCatalog = () => {
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
             <p className="text-gray-600 mt-4">Loading courses...</p>
+            <p className="text-gray-500 text-sm mt-2">This may take a moment if the server is starting up</p>
           </div>
         </div>
       </section>
@@ -94,13 +101,15 @@ const CourseCatalog = () => {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Failed to Load Courses</h2>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Try Again
-            </button>
+            <p className="text-gray-600 mb-4 max-w-md mx-auto">{error}</p>
+            <div className="space-x-4">
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       </section>

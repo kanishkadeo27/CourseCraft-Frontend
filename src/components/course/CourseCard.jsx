@@ -35,11 +35,6 @@ const CourseCard = ({ course }) => {
     return imageId;
   };
 
-  // Function to handle image load errors
-  const handleImageError = () => {
-    // Silent error handling - image will show broken image icon
-  };
-
   // Star Rating Component
   const StarRating = ({ rating }) => {
     return (
@@ -84,7 +79,6 @@ const CourseCard = ({ course }) => {
         <img
           src={getImageSrc(imageId)}
           alt={courseName}
-          onError={handleImageError}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         

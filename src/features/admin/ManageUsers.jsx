@@ -29,7 +29,7 @@ const ManageUsers = () => {
     try {
       setLoading(true);
       const usersData = await adminService.getAllUsers();
-      const usersList = usersData.data || usersData.users || usersData;
+      const usersList = usersData.data;
       setUsers(Array.isArray(usersList) ? usersList : []);
     } catch (error) {
       setUpdateStatus('error');

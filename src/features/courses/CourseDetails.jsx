@@ -241,9 +241,6 @@ const CourseDetails = () => {
                     src={course.trainer.imageUrl}
                     alt={course.trainer.trainerName}
                     className="w-16 h-16 rounded-full object-cover border-4 border-white shadow-md"
-                    onError={(e) => {
-                      e.target.src = "/image/teachers/author1.jpg";
-                    }}
                   />
                   <div className="flex-1">
                     <h4 className="text-lg font-bold text-gray-900 mb-2">{course.trainer.trainerName}</h4>

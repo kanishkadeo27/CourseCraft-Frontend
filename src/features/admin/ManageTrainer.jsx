@@ -10,8 +10,8 @@ const ManageTrainer = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [updating, setUpdating] = useState(false);
   const [trainer, setTrainer] = useState({
-    trainerId: "",
-    trainerName: "",
+    id: "",
+    name: "",
     description: "",
     rating: "",
     imageUrl: "",
@@ -36,11 +36,11 @@ const ManageTrainer = () => {
         
         if (trainerInfo) {
           setTrainer({
-            trainerId: trainerInfo.trainerId,
-            trainerName: trainerInfo.trainerName || "",
-            description: trainerInfo.description || "",
-            rating: trainerInfo.rating ? trainerInfo.rating.toString() : "",
-            imageUrl: trainerInfo.imageUrl || "",
+            id: trainerInfo.id,
+            name: trainerInfo.name,
+            description: trainerInfo.description,
+            rating: trainerInfo.rating.toString(),
+            imageUrl: trainerInfo.imageUrl,
           });
         } else {
           setErrorMessage("Trainer not found");
@@ -65,21 +65,21 @@ const ManageTrainer = () => {
     setErrorMessage("");
     setUpdating(true);
 
-    if (!trainer.trainerName.trim()) {
+    if (!trainer.name.trim()) {
       setErrorMessage("Trainer name is required");
       setSubmitStatus('error');
       setUpdating(false);
       return;
     }
 
-    if (trainer.trainerName.trim().length < 3) {
+    if (trainer.name.trim().length < 3) {
       setErrorMessage("Trainer name must be at least 3 characters long");
       setSubmitStatus('error');
       setUpdating(false);
       return;
     }
 
-    if (trainer.trainerName.trim().length > 200) {
+    if (trainer.name.trim().length > 200) {
       setErrorMessage("Trainer name cannot exceed 200 characters");
       setSubmitStatus('error');
       setUpdating(false);
@@ -107,8 +107,22 @@ const ManageTrainer = () => {
       return;
     }
 
-    if (trainer.rating && (isNaN(trainer.rating) || trainer.rating < 0.0 || trainer.rating > 5.0)) {
+    if (!trainer.rating || trainer.rating === "") {
+      setErrorMessage("Rating is required");
+      setSubmitStatus('error');
+      setUpdating(false);
+      return;
+    }
+
+    if (isNaN(trainer.rating) || trainer.rating < 0.0 || trainer.rating > 5.0) {
       setErrorMessage("Rating must be a number between 0.0 and 5.0");
+      setSubmitStatus('error');
+      setUpdating(false);
+      return;
+    }
+
+    if (!trainer.imageUrl.trim()) {
+      setErrorMessage("Image URL is required");
       setSubmitStatus('error');
       setUpdating(false);
       return;
@@ -116,13 +130,13 @@ const ManageTrainer = () => {
 
     try {
       const payload = {
-        trainerName: trainer.trainerName.trim(),
+        name: trainer.name.trim(),
         description: trainer.description.trim(),
-        rating: trainer.rating ? parseFloat(trainer.rating) : 4.5,
-        imageUrl: trainer.imageUrl.trim() || null,
+        rating: parseFloat(trainer.rating),
+        imageUrl: trainer.imageUrl.trim(),
       };
 
-      await adminService.updateTrainer(trainer.trainerId, payload);
+      await adminService.updateTrainer(trainer.id, payload);
       
       setSubmitStatus('success');
       
@@ -160,26 +174,28 @@ const ManageTrainer = () => {
         <div className="bg-white rounded-lg shadow p-8">
           
           {/* Trainer Preview */}
-          {(trainer.trainerName || trainer.description || trainer.imageUrl || trainer.rating) && (
+          {(trainer.name || trainer.description || trainer.rating) && (
             <div className="mb-8 p-6 bg-gray-50 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Trainer Preview</h3>
               <div className="flex items-start space-x-4">
-                {/* Trainer Image */}
-                <div className="flex-shrink-0">
-                  <img
-                    src={trainer.imageUrl || "/image/teachers/author1.jpg"}
-                    alt={trainer.trainerName || "Trainer"}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                    onError={(e) => {
-                      e.target.src = "/image/teachers/author1.jpg";
-                    }}
-                  />
-                </div>
+                {/* Trainer Image - Only show if URL is provided */}
+                {trainer.imageUrl && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={trainer.imageUrl}
+                      alt={trainer.name}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 
                 {/* Trainer Info */}
                 <div className="flex-1">
                   <h4 className="text-lg font-semibold text-gray-900">
-                    {trainer.trainerName || "Trainer Name"}
+                    {trainer.name}
                   </h4>
                   
                   {/* Rating */}
@@ -187,7 +203,7 @@ const ManageTrainer = () => {
                     <div className="flex items-center mt-1 mb-2">
                       <div className="flex text-yellow-400">
                         {[1, 2, 3, 4, 5].map((star) => {
-                          const rating = parseFloat(trainer.rating) || 0;
+                          const rating = parseFloat(trainer.rating);
                           const filled = rating >= star;
                           const partiallyFilled = rating > star - 1 && rating < star;
                           const fillPercentage = partiallyFilled ? ((rating - (star - 1)) * 100) : 0;
@@ -222,12 +238,12 @@ const ManageTrainer = () => {
                           );
                         })}
                       </div>
-                      <span className="text-gray-600 text-sm ml-2">{trainer.rating || '0.0'}</span>
+                      <span className="text-gray-600 text-sm ml-2">{trainer.rating}</span>
                     </div>
                   )}
                   
                   <p className="text-gray-600 text-sm">
-                    {trainer.description || "Trainer description will appear here..."}
+                    {trainer.description}
                   </p>
                 </div>
               </div>
@@ -268,8 +284,8 @@ const ManageTrainer = () => {
                 </label>
                 <input
                   type="text"
-                  value={trainer.trainerName}
-                  onChange={(e) => setTrainer({ ...trainer, trainerName: e.target.value })}
+                  value={trainer.name}
+                  onChange={(e) => setTrainer({ ...trainer, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Enter trainer's full name"
                   required
@@ -281,7 +297,7 @@ const ManageTrainer = () => {
               {/* Rating */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rating <span className="text-gray-500">(0.0-5.0)</span>
+                  Rating <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -291,7 +307,8 @@ const ManageTrainer = () => {
                   value={trainer.rating}
                   onChange={(e) => setTrainer({ ...trainer, rating: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g., 4.5"
+                  placeholder="Enter rating (0.0-5.0)"
+                  required
                   disabled={updating}
                 />
               </div>
@@ -299,7 +316,7 @@ const ManageTrainer = () => {
               {/* Trainer Image URL */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Trainer Image URL
+                  Trainer Image URL <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="url"
@@ -307,11 +324,9 @@ const ManageTrainer = () => {
                   onChange={(e) => setTrainer({ ...trainer, imageUrl: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="https://example.com/trainer-photo.jpg"
+                  required
                   disabled={updating}
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Provide a URL to the trainer's profile image. Leave empty to use default image.
-                </p>
               </div>
 
               {/* Description */}
