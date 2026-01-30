@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useProgress } from "../../context/ProgressContext";
 
-const CourseCard = ({ course }) => {
+const EnrolledCourseCard = ({ course }) => {
   const navigate = useNavigate();
+  const { getCourseProgress } = useProgress();
 
   const {
     id,
@@ -10,28 +12,25 @@ const CourseCard = ({ course }) => {
     trainer,
     trainerImage,
     rating,
-    price,
     duration,
     imageId,
     level,
     mode,
     language,
-    currentEnrollment
+    totalVideos
   } = course;
+
+  // Get progress for this course
+  const progress = getCourseProgress(id, totalVideos);
 
   // Function to get the correct image source
   const getImageSrc = (imageId) => {
-    // If imageId is a full URL (from backend), use it directly
     if (typeof imageId === 'string' && imageId.startsWith('http')) {
       return imageId;
     }
-    
-    // If imageId is a path starting with /, use it directly
     if (typeof imageId === 'string' && imageId.startsWith('/')) {
       return imageId;
     }
-    
-    // For other formats, return as is
     return imageId;
   };
 
@@ -78,8 +77,17 @@ const CourseCard = ({ course }) => {
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* Course Image with Price Badge */}
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group relative">
+      {/* Progress Badge */}
+      {progress > 0 && (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+            <span className="text-sm font-bold text-indigo-600">{progress}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Course Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={getImageSrc(imageId)}
@@ -88,18 +96,16 @@ const CourseCard = ({ course }) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
         
-        {/* Glassmorphism Price Badge */}
-        <div className="absolute bottom-4 right-4">
-          {price === 0 ? (
-            <div className="backdrop-blur-md bg-white/20 border border-white/30 rounded-full px-3 py-1.5">
-              <span className="text-white font-semibold text-sm drop-shadow-lg">FREE</span>
+        {/* Completion Status Overlay */}
+        {progress === 100 && (
+          <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
+            <div className="bg-green-500 text-white rounded-full p-3">
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
             </div>
-          ) : (
-            <div className="backdrop-blur-md bg-black/20 border border-white/30 rounded-full px-3 py-1.5">
-              <span className="text-white font-semibold text-sm drop-shadow-lg">₹{price.toLocaleString()}</span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Content Area */}
@@ -131,6 +137,11 @@ const CourseCard = ({ course }) => {
               {language}
             </span>
           )}
+          {progress === 100 && (
+            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+              Completed
+            </span>
+          )}
         </div>
 
         {/* Instructor Row */}
@@ -146,30 +157,42 @@ const CourseCard = ({ course }) => {
           </div>
         </div>
 
-        {/* Metadata Row - Rating, Duration, and Enrollment */}
-        <div className="flex items-center justify-between mb-6">
-          <StarRating rating={rating} />
-          <div className="flex items-center gap-3 text-gray-600 text-sm">
-            <div className="flex items-center gap-1">
-              <ClockIcon />
-              <span className="font-medium">{duration} Lessons</span>
-            </div>
-            {currentEnrollment > 0 && (
-              <div className="flex items-center gap-1">
-                <UserIcon />
-                <span className="font-medium">{currentEnrollment}</span>
-              </div>
-            )}
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">Progress</span>
+            <span className="text-sm font-bold text-indigo-600">{progress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-indigo-600 h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Metadata Row - Rating and Duration */}
+        <div className="flex items-center justify-between mb-6">
+          <StarRating rating={rating} />
+          <div className="flex items-center gap-1 text-gray-600 text-sm">
+            <ClockIcon />
+            <span className="font-medium">{duration} Lessons</span>
+          </div>
+        </div>
+
+        {/* Action Button */}
         <div className="flex gap-3">
           <button 
-            onClick={() => navigate(`/courses/${id}`)}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl font-medium transition-colors duration-200"
+            onClick={() => navigate(`/courses/${id}/classroom`)}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-xl font-medium transition-colors duration-200"
           >
-            View Details
+            {progress === 100 ? 'Review Course' : 'Continue Learning'}
+          </button>
+          <button 
+            onClick={() => navigate(`/courses/${id}`)}
+            className="px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl font-medium transition-colors duration-200"
+          >
+            Details
           </button>
         </div>
       </div>
@@ -177,4 +200,4 @@ const CourseCard = ({ course }) => {
   );
 };
 
-export default CourseCard;
+export default EnrolledCourseCard;

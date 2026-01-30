@@ -50,8 +50,8 @@ const AppRoutes = () => {
         
         {/* Public Course Routes */}
         <Route path="/courses" element={<CourseCatalog />} />
-        <Route path="/courses/:id" element={<CourseDetails />} />
         <Route path="/courses/:id/syllabus" element={<CourseSyllabus />} />
+        <Route path="/courses/:id" element={<CourseDetails />} />
         
         {/* Protected Course Routes */}
         <Route path="/courses/:id/classroom" element={

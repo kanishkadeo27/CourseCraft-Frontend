@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+BACKEND_TROUBLESHOOTING.md
+.env
+PROJECT_STATUS.md

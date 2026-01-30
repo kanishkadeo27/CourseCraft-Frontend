@@ -101,8 +101,6 @@ const CreateCourse = () => {
         trainerId: parseInt(course.trainerId)
       };
 
-      console.log("Would create course:", payload);
-
       // TODO: Replace with actual API call when courseService is implemented
       // await createCourse(payload);
       

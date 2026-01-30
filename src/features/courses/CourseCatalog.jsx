@@ -1,85 +1,13 @@
+import { useState, useEffect } from "react";
 import CourseCard from "../../components/course/CourseCard.jsx";
 import { useAuth } from "../../context/AuthContext";
-
-// Mock data for all available courses
-const allCourses = [
-  {
-    id: 1,
-    courseName: "React Fundamentals",
-    courseDescription: "Learn React from scratch with hands-on projects and real-world examples",
-    trainer: "John Doe",
-    rating: 4.5,
-    price: 0,
-    duration: 30,
-    imageId: 1,
-    isEnrolled: true, // User is enrolled in this course
-    totalVideos: 5,
-  },
-  {
-    id: 2,
-    courseName: "Advanced React Patterns",
-    courseDescription: "Master advanced React concepts including hooks, context, and performance optimization",
-    trainer: "Jane Smith",
-    rating: 4.8,
-    price: 0,
-    duration: 45,
-    imageId: 1,
-    isEnrolled: true, // User is enrolled in this course
-    totalVideos: 8,
-  },
-  {
-    id: 3,
-    courseName: "JavaScript Mastery",
-    courseDescription: "Complete JavaScript course covering ES6+, async programming, and modern frameworks",
-    trainer: "Mike Johnson",
-    rating: 4.7,
-    price: 0,
-    duration: 60,
-    imageId: 1,
-    isEnrolled: false, // User is NOT enrolled in this course
-    totalVideos: 12,
-  },
-  {
-    id: 4,
-    courseName: "Node.js Backend Development",
-    courseDescription: "Build scalable backend applications with Node.js, Express, and MongoDB",
-    trainer: "Sarah Wilson",
-    rating: 4.6,
-    price: 0,
-    duration: 50,
-    imageId: 1,
-    isEnrolled: false, // User is NOT enrolled in this course
-    totalVideos: 10,
-  },
-  {
-    id: 5,
-    courseName: "Python for Data Science",
-    courseDescription: "Learn Python programming for data analysis, visualization, and machine learning",
-    trainer: "David Chen",
-    rating: 4.9,
-    price: 0,
-    duration: 70,
-    imageId: 1,
-    isEnrolled: true, // User is enrolled in this course
-    totalVideos: 15,
-  },
-  {
-    id: 6,
-    courseName: "Full Stack Web Development",
-    courseDescription: "Complete web development course covering frontend and backend technologies",
-    trainer: "Emily Rodriguez",
-    rating: 4.7,
-    price: 0,
-    duration: 90,
-    imageId: 1,
-    isEnrolled: false, // User is NOT enrolled in this course
-    totalVideos: 20,
-  },
-];
+import { searchService } from "../../api";
 
 const CourseCatalog = () => {
-  const { user, getUserRole } = useAuth();
-  const userRole = getUserRole();
+  const { user } = useAuth();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Helper function to normalize role
   const normalizeRole = (role) => {
@@ -93,66 +21,147 @@ const CourseCatalog = () => {
 
   const normalizedUserRole = normalizeRole(user?.role);
 
+  // Fetch all courses on component mount
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const data = await searchService.getAllCourses();
+        
+        const coursesData = data.data;
+        
+        // Map the API response to match our CourseCard component expectations
+        const mappedCourses = coursesData.map(course => ({
+          id: course.id,
+          courseName: course.title,
+          courseDescription: course.description,
+          trainer: course.trainer.name,
+          trainerImage: course.trainer.imageUrl,
+          rating: course.trainer.rating,
+          price: course.price,
+          duration: course.syllabus?.lessons?.filter((lesson, index, self) => 
+            index === self.findIndex(l => l.lessonNo === lesson.lessonNo)
+          ).length,
+          imageId: course.thumbnailUrl,
+          isEnrolled: course.enrolled,
+          totalVideos: course.syllabus?.lessons?.filter((lesson, index, self) => 
+            index === self.findIndex(l => l.lessonNo === lesson.lessonNo)
+          ).reduce((total, lesson) => 
+            total + (lesson.materials?.filter(m => m.type === 'VIDEO').length || 0), 0),
+          level: course.level,
+          mode: course.mode,
+          language: course.language,
+          topics: course.topics,
+          category: course.topics?.[0],
+          subcategory: course.topics?.[1],
+          currentEnrollment: 0
+        }));
+
+        setCourses(mappedCourses);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="pt-2 pb-2 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            <p className="text-gray-600 mt-4">Loading courses...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="pt-2 pb-2 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center py-12">
+            <div className="text-red-500 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Failed to Load Courses</h2>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="pt-2 pb-2 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
+        
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">All Courses</h1>
           <p className="text-xl text-gray-600">Discover our comprehensive collection of courses</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {allCourses.map((course) => {
-            return (
-              <div key={course.id} className="relative">
-                <CourseCard course={course} user={user} />
-                
-                {/* Enrollment Status Badge - Only show for regular users */}
-                {normalizedUserRole === "user" && (
-                  <div className="absolute top-4 right-4">
-                    {course.isEnrolled ? (
-                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        Enrolled
-                      </span>
-                    ) : (
-                      <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        Available
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        {courses.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">No Courses Available</h2>
+            <p className="text-gray-600">Check back later for new courses.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course) => {
+              return (
+                <div key={course.id} className="relative">
+                  <CourseCard course={course} />
+                  
+                  {/* Enrollment Status Badge - Only show for regular users */}
+                  {normalizedUserRole === "user" && (
+                    <div className="absolute top-4 right-4">
+                      {course.isEnrolled ? (
+                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          Enrolled
+                        </span>
+                      ) : (
+                        <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          Available
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Course Statistics */}
-        <div className="mt-16 bg-white rounded-lg shadow-md p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div>
-              <h3 className="text-3xl font-bold text-indigo-600">{allCourses.length}</h3>
-              <p className="text-gray-600 mt-2">Total Courses</p>
+        {courses.length > 0 && (
+          <div className="mt-16 bg-white rounded-lg shadow-md p-8">
+            <div className="text-center">
+              <h3 className="text-3xl font-bold text-indigo-600">{courses.length}</h3>
+              <p className="text-gray-600 mt-2">Total Courses Available</p>
             </div>
-            
-            {/* Show enrollment statistics only for regular users */}
-            {normalizedUserRole === "user" && (
-              <>
-                <div>
-                  <h3 className="text-3xl font-bold text-green-600">
-                    {allCourses.filter(course => course.isEnrolled).length}
-                  </h3>
-                  <p className="text-gray-600 mt-2">Enrolled Courses</p>
-                </div>
-                <div>
-                  <h3 className="text-3xl font-bold text-blue-600">
-                    {allCourses.filter(course => !course.isEnrolled).length}
-                  </h3>
-                  <p className="text-gray-600 mt-2">Available to Enroll</p>
-                </div>
-              </>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

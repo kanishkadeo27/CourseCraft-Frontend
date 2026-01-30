@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { courseService } from '../../api';
 import PdfViewer from '../../components/common/PdfViewer';
 
 const PdfViewerPage = () => {
@@ -8,46 +9,51 @@ const PdfViewerPage = () => {
   const [pdfData, setPdfData] = useState(null);
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    const mockCourse = {
-      id: parseInt(id),
-      courseName: "React Fundamentals",
-      pdfs: [
-        {
-          id: 1,
-          title: "Spring Boot Tutorial",
-          filename: "spring_boot_tutorial.pdf",
-          url: "/pdf/study-material/spring_boot_tutorial.pdf",
-          description: "Complete guide to Spring Boot framework"
-        },
-        {
-          id: 2,
-          title: "React Basics Guide",
-          filename: "react_basics.pdf",
-          url: "/pdf/study-material/react_basics.pdf",
-          description: "Introduction to React concepts and components"
-        },
-        {
-          id: 3,
-          title: "JavaScript ES6+ Features",
-          filename: "javascript_es6.pdf",
-          url: "/pdf/study-material/javascript_es6.pdf",
-          description: "Modern JavaScript features and syntax"
+    const fetchCourseAndPdf = async () => {
+      try {
+        setLoading(true);
+        const data = await courseService.getCourseContent(id);
+        
+        // Map API response to component expectations
+        const mappedCourse = {
+          id: parseInt(id),
+          courseName: data.title || data.courseName,
+          pdfs: data.syllabus?.lessons?.flatMap(lesson => 
+            lesson.materials?.filter(material => material.type === 'PDF').map(pdf => ({
+              id: pdf.id,
+              title: pdf.title,
+              filename: pdf.title.toLowerCase().replace(/\s+/g, '_') + '.pdf',
+              url: pdf.path,
+              description: `Study material for ${lesson.lessonName}`,
+              lessonName: lesson.lessonName,
+              lessonNo: lesson.lessonNo
+            }))
+          ) || []
+        };
+
+        setCourse(mappedCourse);
+        
+        // Find the specific PDF
+        const pdf = mappedCourse.pdfs.find(p => p.id === parseInt(pdfId));
+        if (pdf) {
+          setPdfData(pdf);
+        } else {
+          setError("PDF document not found");
         }
-      ]
+        
+      } catch (err) {
+        setError(err.message || "Failed to load document. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setCourse(mockCourse);
-    
-    // Find the specific PDF
-    const pdf = mockCourse.pdfs.find(p => p.id === parseInt(pdfId));
-    if (pdf) {
-      setPdfData(pdf);
+    if (id && pdfId) {
+      fetchCourseAndPdf();
     }
-    
-    setLoading(false);
   }, [id, pdfId]);
 
   if (loading) {
@@ -61,7 +67,7 @@ const PdfViewerPage = () => {
     );
   }
 
-  if (!pdfData) {
+  if (error || !pdfData) {
     return (
       <div className="min-h-screen bg-gray-50 pt-2 flex items-center justify-center">
         <div className="text-center">
@@ -70,13 +76,19 @@ const PdfViewerPage = () => {
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             <h3 className="text-lg font-semibold mb-2">Document Not Found</h3>
-            <p className="text-gray-600 mb-4">The requested PDF document could not be found.</p>
+            <p className="text-gray-600 mb-4">{error || "The requested PDF document could not be found."}</p>
           </div>
           <button
             onClick={() => navigate(`/courses/${id}`)}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors mr-4"
           >
             Back to Course
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Try Again
           </button>
         </div>
       </div>

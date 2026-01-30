@@ -5,7 +5,16 @@ const ProgressContext = createContext();
 export const useProgress = () => {
   const context = useContext(ProgressContext);
   if (!context) {
-    throw new Error('useProgress must be used within a ProgressProvider');
+    // Return null object with safe defaults instead of throwing error
+    // This handles cases where ProgressProvider is not available (admin/guest users)
+    return {
+      courseProgress: {},
+      markVideoCompleted: () => {},
+      markVideoIncomplete: () => {},
+      isVideoCompleted: () => false,
+      getCourseProgress: () => 0,
+      getCompletedVideoCount: () => 0
+    };
   }
   return context;
 };

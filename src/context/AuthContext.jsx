@@ -94,6 +94,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(userData));
       
+      // Clear course progress if user is not a regular user (admin/guest)
+      const userRole = userData.role?.toLowerCase();
+      if (userRole !== 'user' && !userRole?.includes('user')) {
+        localStorage.removeItem("courseProgress");
+      }
+      
       setUser(userData);
       return data;
     } catch (error) {
@@ -176,6 +182,8 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    // Clear course progress data on logout
+    localStorage.removeItem("courseProgress");
     setUser(null);
   };
 
