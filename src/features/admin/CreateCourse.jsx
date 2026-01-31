@@ -31,7 +31,7 @@ const CreateCourse = () => {
       try {
         setTrainersLoading(true);
         const response = await adminService.getAllTrainers();
-        setTrainers(response.data || []);
+        setTrainers(response.data.data || []);
       } catch (err) {
         setSubmitStatus('error');
         setTrainers([]);

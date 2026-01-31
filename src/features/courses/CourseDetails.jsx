@@ -17,7 +17,7 @@ const CourseDetails = () => {
       try {
         setLoading(true);
         const response = await courseService.getCourseById(id);
-        const data = response.data; // Extract the actual course data from the response
+        const data = response.data.data; // Extract the actual course data from the response
         
         // Map API response to component expectations
         const mappedCourse = {

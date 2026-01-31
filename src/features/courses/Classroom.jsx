@@ -27,10 +27,10 @@ const Classroom = () => {
         let courseData;
         if (passedCourseData) {
           const detailedData = await courseService.getCourseById(id);
-          courseData = detailedData.data;
+          courseData = detailedData.data.data;
         } else {
           const data = await courseService.getCourseById(id);
-          courseData = data.data;
+          courseData = data.data.data || data.data;
         }
         
         // Map API response to component expectations

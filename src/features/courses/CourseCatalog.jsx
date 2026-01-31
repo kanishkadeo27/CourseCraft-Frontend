@@ -30,7 +30,7 @@ const CourseCatalog = () => {
         
         const data = await searchService.getAllCourses();
         
-        const coursesData = data.data;
+        const coursesData = data.data.data;
         
         if (!coursesData || !Array.isArray(coursesData)) {
           throw new Error('Invalid course data received from server');

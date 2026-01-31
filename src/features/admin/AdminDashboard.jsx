@@ -30,7 +30,7 @@ const AdminDashboard = () => {
       
       // Load trainers count separately since it's not in dashboard API
       const trainersData = await adminService.getAllTrainers();
-      const trainersList = trainersData.data || trainersData.trainers || trainersData;
+      const trainersList = trainersData.data.data || trainersData.trainers || trainersData;
       const trainersCount = Array.isArray(trainersList) ? trainersList.length : 0;
       
       setStats({

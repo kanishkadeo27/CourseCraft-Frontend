@@ -25,7 +25,7 @@ const ManageTrainers = () => {
     try {
       setLoading(true);
       const trainersData = await adminService.getAllTrainers();
-      const trainersList = trainersData.data || trainersData.trainers || trainersData;
+      const trainersList = trainersData.data.data|| trainersData.data || trainersData.trainers || trainersData;
       setTrainers(Array.isArray(trainersList) ? trainersList : []);
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to load trainers' });
